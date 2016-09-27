@@ -1,5 +1,5 @@
 {
-  "name": "inflect",
+  "name": "html-inflect",
   "version": "1.0.0",
   "description": "Cleanup, modify, and save messy HTML",
   "main": "dist/inflect.js",
