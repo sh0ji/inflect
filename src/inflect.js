@@ -21,7 +21,7 @@ const DefaultTasks = [{
 },
 {
     'action': 'removeAttribute',
-    'selector': '[lang]',
+    'selector': '[lang]:not(html)',
     'attribute': 'lang'
 }]
 
