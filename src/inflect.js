@@ -78,12 +78,14 @@ class Inflect {
 
     // fix element based on data in item object
     fixElement(el, item) {
-        // change tagName
-        if (item[ItemKeys.tagReplacement] &&
-            el.tagName.toLowerCase() !== item[ItemKeys.tagReplacement].toLowerCase()) {
-            let emptyEl = this.doc.createElement(item[ItemKeys.tagReplacement].toLowerCase())
-            let newEl = this._getChildren(el, emptyEl)
-            el.parentNode.replaceChild(newEl, el)
+        let currentTag = el.tagName.toLowerCase()
+        let newTag = (item[ItemKeys.tagReplacement]) ? item[ItemKeys.tagReplacement].toLowerCase() : null
+
+        // change tag by regexp replacing the opening and closing strings
+        if (newTag && currentTag !== newTag) {
+            let openTag = new RegExp(`<${currentTag} `, 'g')
+            let closeTag = new RegExp(`/${currentTag}>`, 'g')
+            el.outerHTML = el.outerHTML.replace(openTag, `<${newTag} `).replace(closeTag, `/${newTag}>`)
         }
         this.setAttributes(el, item)
     }
