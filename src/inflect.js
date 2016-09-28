@@ -9,13 +9,17 @@
 
 'use strict'
 
+// CONSTANTS
+
 const Default = {
-    includeDefaultTasks: true,
+    includeInDesignTasks: true,
     removeWhitespace: true,
     vocab: 'epub'
 }
 
-const DefaultTasks = [{
+// tasks for common InDesign HTML export issues
+// these are run first if included via the includeInDesignTasks option
+const InDesignTasks = [{
     'action': 'removeElement',
     'selector': '[id^=_id],[class^=_id]'
 },
@@ -56,7 +60,7 @@ class Inflect {
     }
 
 
-    // public
+    // PUBLIC
 
     // delete an element, but leave the non-empty children
     removeElement(el) {
@@ -124,7 +128,7 @@ class Inflect {
     }
 
 
-    // private
+    // PRIVATE
 
     // overwrite default options with supplied options
     _getConfig(config) {
@@ -133,7 +137,7 @@ class Inflect {
 
     // add items to the end of default tasks
     _getItems(items) {
-        return (this.config.includeDefaultTasks) ? DefaultTasks.concat(items) : items
+        return (this.config.includeInDesignTasks) ? InDesignTasks.concat(items) : items
     }
 
     // returns true if the node is an empty text string
