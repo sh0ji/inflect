@@ -27,11 +27,17 @@ const DefaultTasks = [{
 
 const ItemKeys = {
     selector: 'selector',
-    tagReplacement: 'tagName',
-    epubMicrodata: 'epub',
-    dpubMicrodata: 'dpub',
+    tagReplacement: 'tag',
     attributeRemoval: 'attribute'
 }
+
+const VocabAttrName = {
+    dpub: 'role',
+    epub: 'epub:type'
+}
+
+
+// CLASS DEFINITION
 
 class Inflect {
 
@@ -92,14 +98,8 @@ class Inflect {
 
     // set attributes on the element based on data in item object
     setAttributes(el, item) {
-        if (item[ItemKeys.tagReplacement]) {
-            el.className = item[ItemKeys.selector].replace('.', '')
-        }
-        if (item[ItemKeys.epubMicrodata] && this.config.vocab === 'epub') {
-            el.setAttribute('epub:type', item[ItemKeys.epubMicrodata])
-        }
-        if (item[ItemKeys.dpubMicrodata] && this.config.vocab === 'dpub') {
-            el.setAttribute('role', item[ItemKeys.dpubMicrodata])
+        if (item[this.config.vocab]) {
+            el.setAttribute(VocabAttrName[this.config.vocab], item[this.config.vocab])
         }
     }
 
