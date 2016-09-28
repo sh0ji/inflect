@@ -1,6 +1,6 @@
 /**
  * --------------------------------------------------------------------------
- * Inflect (v1.0.0): inflect.js
+ * Inflect (v1.0.1): inflect.js
  * Cleanup, modify, and save messy HTML
  * by Evan Yamanishi
  * Licensed under GPL-3.0
@@ -8,6 +8,8 @@
  */
 
 'use strict';
+
+// CONSTANTS
 
 Object.defineProperty(exports, "__esModule", {
     value: true
@@ -20,27 +22,34 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var Default = {
-    includeDefaultTasks: true,
+    includeInDesignTasks: true,
     removeWhitespace: true,
     vocab: 'epub'
 };
 
-var DefaultTasks = [{
+// tasks for common InDesign HTML export issues
+// these are run first if included via the includeInDesignTasks option
+var InDesignTasks = [{
     'action': 'removeElement',
     'selector': '[id^=_id],[class^=_id]'
 }, {
     'action': 'removeAttribute',
-    'selector': '[lang]',
+    'selector': '[lang]:not(html)',
     'attribute': 'lang'
 }];
 
 var ItemKeys = {
     selector: 'selector',
-    tagReplacement: 'tagName',
-    epubMicrodata: 'epub',
-    dpubMicrodata: 'dpub',
+    tagReplacement: 'tag',
     attributeRemoval: 'attribute'
 };
+
+var VocabAttrName = {
+    dpub: 'role',
+    epub: 'epub:type'
+};
+
+// CLASS DEFINITION
 
 var Inflect = function () {
 
@@ -81,7 +90,7 @@ var Inflect = function () {
         }
     }
 
-    // public
+    // PUBLIC
 
     // delete an element, but leave the non-empty children
 
@@ -161,11 +170,14 @@ var Inflect = function () {
     }, {
         key: 'fixElement',
         value: function fixElement(el, item) {
-            // change tagName
-            if (item[ItemKeys.tagReplacement] && el.tagName.toLowerCase() !== item[ItemKeys.tagReplacement].toLowerCase()) {
-                var emptyEl = this.doc.createElement(item[ItemKeys.tagReplacement].toLowerCase());
-                var newEl = this._getChildren(el, emptyEl);
-                el.parentNode.replaceChild(newEl, el);
+            var currentTag = el.tagName.toLowerCase();
+            var newTag = item[ItemKeys.tagReplacement] ? item[ItemKeys.tagReplacement].toLowerCase() : null;
+
+            // change tag by regexp replacing the opening and closing strings
+            if (newTag && currentTag !== newTag) {
+                var openTag = new RegExp('<' + currentTag + ' ', 'g');
+                var closeTag = new RegExp('/' + currentTag + '>', 'g');
+                el.outerHTML = el.outerHTML.replace(openTag, '<' + newTag + ' ').replace(closeTag, '/' + newTag + '>');
             }
             this.setAttributes(el, item);
         }
@@ -175,14 +187,8 @@ var Inflect = function () {
     }, {
         key: 'setAttributes',
         value: function setAttributes(el, item) {
-            if (item[ItemKeys.tagReplacement]) {
-                el.className = item[ItemKeys.selector].replace('.', '');
-            }
-            if (item[ItemKeys.epubMicrodata] && this.config.vocab === 'epub') {
-                el.setAttribute('epub:type', item[ItemKeys.epubMicrodata]);
-            }
-            if (item[ItemKeys.dpubMicrodata] && this.config.vocab === 'dpub') {
-                el.setAttribute('role', item[ItemKeys.dpubMicrodata]);
+            if (item[this.config.vocab]) {
+                el.setAttribute(VocabAttrName[this.config.vocab], item[this.config.vocab]);
             }
         }
 
@@ -230,7 +236,7 @@ var Inflect = function () {
             }
         }
 
-        // private
+        // PRIVATE
 
         // overwrite default options with supplied options
 
@@ -245,7 +251,7 @@ var Inflect = function () {
     }, {
         key: '_getItems',
         value: function _getItems(items) {
-            return this.config.includeDefaultTasks ? DefaultTasks.concat(items) : items;
+            return this.config.includeInDesignTasks ? InDesignTasks.concat(items) : items;
         }
 
         // returns true if the node is an empty text string
