@@ -64,11 +64,10 @@ class Inflect {
 
     // delete an element, but leave the non-empty children
     removeElement(el) {
-        // save children into document fragment
-        let newEl = this._getChildren(el, this.doc.createDocumentFragment())
-
-        // document fragment disappears on replaceChild, leaving just the children
-        el.parentNode.replaceChild(newEl, el)
+        while (el.firstChild) {
+            el.parentNode.insertBefore(el.firstChild, el)
+        }
+        el.parentNode.removeChild(el)
     }
 
     // delete an attribute from an element
