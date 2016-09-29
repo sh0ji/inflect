@@ -1,6 +1,6 @@
 /**
  * --------------------------------------------------------------------------
- * Inflect (v1.0.1): inflect.js
+ * Inflect (v1.0.2): inflect.js
  * Cleanup, modify, and save messy HTML
  * by Evan Yamanishi
  * Licensed under GPL-3.0
@@ -20,6 +20,9 @@ var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var NAME = 'inflect';
+var VERSION = '1.0.2';
 
 var Default = {
     includeInDesignTasks: true,
@@ -98,11 +101,10 @@ var Inflect = function () {
     _createClass(Inflect, [{
         key: 'removeElement',
         value: function removeElement(el) {
-            // save children into document fragment
-            var newEl = this._getChildren(el, this.doc.createDocumentFragment());
-
-            // document fragment disappears on replaceChild, leaving just the children
-            el.parentNode.replaceChild(newEl, el);
+            while (el.firstChild) {
+                el.parentNode.insertBefore(el.firstChild, el);
+            }
+            el.parentNode.removeChild(el);
         }
 
         // delete an attribute from an element
