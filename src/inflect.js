@@ -1,6 +1,6 @@
 /**
  * --------------------------------------------------------------------------
- * Inflect (v1.0.2): inflect.js
+ * Inflect (v1.0.3): inflect.js
  * Cleanup, modify, and save messy HTML
  * by Evan Yamanishi
  * Licensed under GPL-3.0
@@ -12,7 +12,7 @@
 // CONSTANTS
 
 const NAME = 'inflect'
-const VERSION = '1.0.2'
+const VERSION = '1.0.3'
 
 const Default = {
     includeInDesignTasks: true,
