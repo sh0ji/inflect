@@ -95,7 +95,7 @@ class Inflect {
 
         // change tag by regexp replacing the opening and closing strings
         if (newTag && currentTag !== newTag) {
-            let openTag = new RegExp(`<${currentTag} `, 'g')
+            let openTag = new RegExp(`<${currentTag}\s*`, 'g')
             let closeTag = new RegExp(`/${currentTag}>`, 'g')
             el.outerHTML = el.outerHTML.replace(openTag, `<${newTag} `).replace(closeTag, `/${newTag}>`)
         }
