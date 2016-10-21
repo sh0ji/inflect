@@ -17,7 +17,6 @@ const VERSION = '1.1.0'
 const Default = {
     autoRun: true,
     debug: false,
-    presets: ['html-inflect-preset-indesign'],
     removeWhitespace: true,
     vocab: 'epub'
 }
