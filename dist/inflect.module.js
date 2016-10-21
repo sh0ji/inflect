@@ -1,6 +1,6 @@
 /**
  * --------------------------------------------------------------------------
- * Inflect (v1.0.3): inflect.js
+ * Inflect (v1.1.0): inflect.js
  * Cleanup, modify, and save messy HTML
  * by Evan Yamanishi
  * Licensed under GPL-3.0
@@ -22,29 +22,13 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var NAME = 'inflect';
-var VERSION = '1.0.3';
+var VERSION = '1.1.0';
 
 var Default = {
-    includeInDesignTasks: true,
+    autoRun: true,
+    debug: false,
     removeWhitespace: true,
     vocab: 'epub'
-};
-
-// tasks for common InDesign HTML export issues
-// these are run first if included via the includeInDesignTasks option
-var InDesignTasks = [{
-    'action': 'removeElement',
-    'selector': '[id^=_id],[class^=_id]'
-}, {
-    'action': 'removeAttribute',
-    'selector': '[lang]:not(html)',
-    'attribute': 'lang'
-}];
-
-var ItemKeys = {
-    selector: 'selector',
-    tagReplacement: 'tag',
-    attributeRemoval: 'attribute'
 };
 
 var VocabAttrName = {
@@ -52,44 +36,54 @@ var VocabAttrName = {
     epub: 'epub:type'
 };
 
+var Error = {
+    ACTION_MISSING_KEY: function ACTION_MISSING_KEY(task, action, missingKey) {
+        return {
+            title: 'The ' + action + ' action requires an \'' + missingKey + '\' key and value.',
+            description: 'The task must be in the format { action: ' + action + ', ' + missingKey + ': value }'
+        };
+    },
+    ACTION_NOT_VALID: function ACTION_NOT_VALID(task, action) {
+        return {
+            title: action + ' is not a valid action.'
+        };
+    },
+    ATTRIBUTE_NOT_VALID: function ATTRIBUTE_NOT_VALID(task, attribute) {
+        return {
+            title: attribute + ' is not a valid attribute.',
+            description: 'The attribute must be a string, an array of strings, or an object with a name key ({ name: \'href\' }).'
+        };
+    },
+    ATTRIBUTE_MISSING_KEY: function ATTRIBUTE_MISSING_KEY(task, attribute) {
+        return {
+            title: attribute + ' is missing a key. Both the name and value keys are required.',
+            description: 'To set an attribute, format the attribute as an object with both a name key and a value key. e.g. [{ name: \'href\', value: \'#mylink\' }]'
+        };
+    }
+};
+
 // CLASS DEFINITION
 
 var Inflect = function () {
 
-    // accepts a document, array of items (items.json), and optional config
-    function Inflect(doc, items, config) {
+    // accepts a document and optional config
+    function Inflect(doc, config) {
+        var _this = this;
+
         _classCallCheck(this, Inflect);
 
         this.doc = doc;
         this.config = this._getConfig(config);
+        this.tasks = this._getTasks(this.config.tasks);
+        this.count = {};
 
-        if (items) {
-            this.items = this._getItems(items);
-
-            var _iteratorNormalCompletion = true;
-            var _didIteratorError = false;
-            var _iteratorError = undefined;
-
-            try {
-                for (var _iterator = this.items[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-                    var item = _step.value;
-
-                    this.inflectItem(item);
-                }
-            } catch (err) {
-                _didIteratorError = true;
-                _iteratorError = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion && _iterator.return) {
-                        _iterator.return();
-                    }
-                } finally {
-                    if (_didIteratorError) {
-                        throw _iteratorError;
-                    }
-                }
-            }
+        if (this.config.autoRun) {
+            this.tasks.map(function (task) {
+                _this.runTask(task, function (error, taskName) {
+                    if (error) _this._handleError(error);
+                    if (taskName) _this._incrementCount(taskName);
+                });
+            });
         }
     }
 
@@ -100,142 +94,143 @@ var Inflect = function () {
 
     _createClass(Inflect, [{
         key: 'removeElement',
-        value: function removeElement(el) {
+        value: function removeElement(el, task, callback) {
+            var actionName = 'removeElement';
             while (el.firstChild) {
                 el.parentNode.insertBefore(el.firstChild, el);
             }
             el.parentNode.removeChild(el);
+            callback(null, actionName);
         }
 
         // delete an attribute from an element
 
     }, {
-        key: 'removeAttr',
-        value: function removeAttr(el, item) {
-            if (item[ItemKeys.attributeRemoval] === 'all') {
-                var _iteratorNormalCompletion2 = true;
-                var _didIteratorError2 = false;
-                var _iteratorError2 = undefined;
-
-                try {
-                    for (var _iterator2 = el.attributes[Symbol.iterator](), _step2; !(_iteratorNormalCompletion2 = (_step2 = _iterator2.next()).done); _iteratorNormalCompletion2 = true) {
-                        var attr = _step2.value;
-
-                        el.removeAttribute(attr.name);
+        key: 'removeAttribute',
+        value: function removeAttribute(el, task, callback) {
+            var actionName = 'removeAttribute';
+            switch (_typeof(task.attribute)) {
+                case 'string':
+                    if (task.attribute === 'all') {
+                        Array.from(el.attributes).map(function (attr) {
+                            el.removeAttribute(attr.name);
+                        });
+                    } else {
+                        el.removeAttribute(task.attribute);
                     }
-                } catch (err) {
-                    _didIteratorError2 = true;
-                    _iteratorError2 = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion2 && _iterator2.return) {
-                            _iterator2.return();
+                    callback(null, actionName);
+                    break;
+                case 'object':
+                    task.attribute.map(function (attr) {
+                        if (typeof attr === 'string') {
+                            el.removeAttribute(attr);
+                            callback(null, actionName);
+                        } else if (attr.name) {
+                            el.removeAttribute(attr.name);
+                            callback(null, actionName);
+                        } else {
+                            callback(Error.ATTRIBUTE_NOT_VALID(task, attr));
                         }
-                    } finally {
-                        if (_didIteratorError2) {
-                            throw _iteratorError2;
-                        }
-                    }
-                }
-            } else if (_typeof(item[ItemKeys.attributeRemoval]) === 'object') {
-                var _iteratorNormalCompletion3 = true;
-                var _didIteratorError3 = false;
-                var _iteratorError3 = undefined;
-
-                try {
-                    for (var _iterator3 = item[ItemKeys.attributeRemoval][Symbol.iterator](), _step3; !(_iteratorNormalCompletion3 = (_step3 = _iterator3.next()).done); _iteratorNormalCompletion3 = true) {
-                        var _attr = _step3.value;
-
-                        el.removeAttribute(_attr);
-                    }
-                } catch (err) {
-                    _didIteratorError3 = true;
-                    _iteratorError3 = err;
-                } finally {
-                    try {
-                        if (!_iteratorNormalCompletion3 && _iterator3.return) {
-                            _iterator3.return();
-                        }
-                    } finally {
-                        if (_didIteratorError3) {
-                            throw _iteratorError3;
-                        }
-                    }
-                }
-            } else {
-                el.removeAttribute(item[ItemKeys.attributeRemoval]);
+                    });
+                    break;
+                case 'undefined':
+                    callback(Error.ACTION_MISSING_KEY(task, actionName, 'attribute'));
+                    break;
+                default:
+                    callback(Error.ATTRIBUTE_NOT_VALID(task.attribute));
             }
         }
 
-        // fix element based on data in item object
+        // change tag by regexp replacing the opening and closing strings
 
     }, {
-        key: 'fixElement',
-        value: function fixElement(el, item) {
-            var currentTag = el.tagName.toLowerCase();
-            var newTag = item[ItemKeys.tagReplacement] ? item[ItemKeys.tagReplacement].toLowerCase() : null;
-
-            // change tag by regexp replacing the opening and closing strings
-            if (newTag && currentTag !== newTag) {
+        key: 'replaceTag',
+        value: function replaceTag(el, task, callback) {
+            var actionName = 'replaceTag';
+            var newTag = task.tag ? task.tag.toLowerCase() : null;
+            var currentTag = el.nodeName.toLowerCase();
+            if (!newTag) {
+                callback(Error.ACTION_MISSING_KEY(task, actionName, 'tag'));
+            } else if (currentTag !== newTag) {
                 var openTag = new RegExp('<' + currentTag + 's*', 'g');
                 var closeTag = new RegExp('/' + currentTag + '>', 'g');
                 el.outerHTML = el.outerHTML.replace(openTag, '<' + newTag + ' ').replace(closeTag, '/' + newTag + '>');
+                callback(null, actionName);
             }
-            this.setAttributes(el, item);
         }
 
-        // set attributes on the element based on data in item object
+        // set attributes on the element based on data in task object
 
     }, {
-        key: 'setAttributes',
-        value: function setAttributes(el, item) {
-            if (item[this.config.vocab]) {
-                el.setAttribute(VocabAttrName[this.config.vocab], item[this.config.vocab]);
+        key: 'setAttribute',
+        value: function setAttribute(el, task, callback) {
+            var actionName = 'setAttribute';
+            switch (_typeof(task.attribute)) {
+                case 'object':
+                    // coerce attributes into an array for easier iteration
+                    var attrs = task.attribute[0] === undefined ? Array.of(task.attribute) : task.attribute;
+                    attrs.map(function (attr) {
+                        if (attr.name && attr.value) {
+                            el.setAttribute(attr.name, attr.value);
+                            callback(null, actionName);
+                        } else {
+                            callback(Error.ATTRIBUTE_MISSING_KEY(task, attr));
+                        }
+                    });
+                    break;
+                case 'undefined':
+                    if (task[this.config.vocab]) {
+                        el.setAttribute(VocabAttrName[this.config.vocab], task[this.config.vocab]);
+                        callback(null, this.config.vocab);
+                    } else {
+                        callback(Error.ACTION_MISSING_KEY(task, actionName, 'attribute'));
+                    }
+                    break;
+                default:
+                    callback(Error.ATTRIBUTE_NOT_VALID(task, task.attribute));
             }
         }
 
         // the starting-point function for semantic inflection
 
     }, {
-        key: 'inflectItem',
-        value: function inflectItem(item) {
-            var elements = this.doc.querySelectorAll(item[ItemKeys.selector]);
+        key: 'runTask',
+        value: function runTask(task, callback) {
+            var _this2 = this;
 
-            var _iteratorNormalCompletion4 = true;
-            var _didIteratorError4 = false;
-            var _iteratorError4 = undefined;
+            var elements = Array.from(this.doc.querySelectorAll(task.selector));
 
-            try {
-                for (var _iterator4 = elements[Symbol.iterator](), _step4; !(_iteratorNormalCompletion4 = (_step4 = _iterator4.next()).done); _iteratorNormalCompletion4 = true) {
-                    var el = _step4.value;
+            elements.map(function (el) {
+                if (_this2.config.removeWhitespace) _this2._removeWhitespace(el);
 
-                    if (this.config.removeWhitespace) this._removePrecedingWhitespace(el);
-
-                    switch (item.action) {
-                        case 'removeElement':
-                            this.removeElement(el);
-                            break;
-                        case 'removeAttribute':
-                            this.removeAttr(el, item);
-                            break;
-                        default:
-                            this.fixElement(el, item);
-                    }
+                switch (_typeof(task.action)) {
+                    case 'function':
+                        task.action.call(el, function (error, taskName) {
+                            callback(error, taskName);
+                        });
+                        break;
+                    case 'string':
+                        _this2[task.action](el, task, function (error, taskName) {
+                            callback(error, taskName);
+                        });
+                        break;
+                    case 'object':
+                        task.action.map(function (action) {
+                            if (typeof action === 'string') {
+                                _this2[action](el, task, function (error, taskName) {
+                                    callback(error, taskName);
+                                });
+                            } else {
+                                callback(ACTION_NOT_VALID(action));
+                            }
+                        });
+                    case 'undefined':
+                        _this2._fixElement(el, task);
+                        break;
+                    default:
+                        callback(ACTION_NOT_VALID(task.action));
                 }
-            } catch (err) {
-                _didIteratorError4 = true;
-                _iteratorError4 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion4 && _iterator4.return) {
-                        _iterator4.return();
-                    }
-                } finally {
-                    if (_didIteratorError4) {
-                        throw _iteratorError4;
-                    }
-                }
-            }
+            });
         }
 
         // PRIVATE
@@ -248,12 +243,43 @@ var Inflect = function () {
             return Object.assign({}, Default, config);
         }
 
-        // add items to the end of default tasks
+        // combine preset tasks
+        // resulting array holds all presets in order followed by user-specified tasks
 
     }, {
-        key: '_getItems',
-        value: function _getItems(items) {
-            return this.config.includeInDesignTasks ? InDesignTasks.concat(items) : items;
+        key: '_getTasks',
+        value: function _getTasks(tasks) {
+            tasks = typeof tasks === 'undefined' ? [] : tasks;
+            var presets = [];
+            if (this.config.presets) {
+                this.config.presets.map(function (preset) {
+                    var p = require(preset);
+                    presets = presets.concat(p);
+                });
+            }
+            tasks = presets.concat(tasks);
+            return tasks;
+        }
+
+        // attempt to dynamically fix the element when no action is given
+
+    }, {
+        key: '_fixElement',
+        value: function _fixElement(el, task) {
+            var _this3 = this;
+
+            if (task.attribute || task[this.config.vocab]) {
+                this.setAttribute(el, task, function (error, taskName) {
+                    if (error) _this3._handleError(error);
+                    if (taskName) _this3._incrementCount(taskName);
+                });
+            }
+            if (task.tag) {
+                this.replaceTag(el, task, function (error, taskName) {
+                    if (error) _this3._handleError(error);
+                    if (taskName) _this3._incrementCount(taskName);
+                });
+            }
         }
 
         // returns true if the node is an empty text string
@@ -265,13 +291,16 @@ var Inflect = function () {
             return node && node.nodeType === 3 && node.nodeValue.trim().length === 0;
         }
 
-        // remove the previous node if it's empty
+        // remove the surrounding whitespace
 
     }, {
-        key: '_removePrecedingWhitespace',
-        value: function _removePrecedingWhitespace(el) {
-            var prev = el.previousSibling;
-            if (this._nodeIsEmpty(prev)) prev.remove();
+        key: '_removeWhitespace',
+        value: function _removeWhitespace(el) {
+            var prev = el;
+            while ((prev = prev.previousSibling) && this._nodeIsEmpty(prev)) {
+                prev.remove();
+            }
+            if (this._nodeIsEmpty(el.nextSibling)) el.nextSibling.remove();
         }
 
         // copy all non-empty children from one element (el) to another (newEl)
@@ -279,32 +308,33 @@ var Inflect = function () {
     }, {
         key: '_getChildren',
         value: function _getChildren(el, newEl) {
-            var _iteratorNormalCompletion5 = true;
-            var _didIteratorError5 = false;
-            var _iteratorError5 = undefined;
+            var _this4 = this;
 
-            try {
-                for (var _iterator5 = el.childNodes[Symbol.iterator](), _step5; !(_iteratorNormalCompletion5 = (_step5 = _iterator5.next()).done); _iteratorNormalCompletion5 = true) {
-                    var child = _step5.value;
-
-                    if (!this._nodeIsEmpty(child)) newEl.appendChild(child);
-                }
-            } catch (err) {
-                _didIteratorError5 = true;
-                _iteratorError5 = err;
-            } finally {
-                try {
-                    if (!_iteratorNormalCompletion5 && _iterator5.return) {
-                        _iterator5.return();
-                    }
-                } finally {
-                    if (_didIteratorError5) {
-                        throw _iteratorError5;
-                    }
-                }
-            }
-
+            Array.from(el.children).map(function (child) {
+                if (!_this4._nodeIsEmpty(child)) newEl.appendChild(child);
+            });
             return newEl;
+        }
+
+        // increase the count for a specified count key
+
+    }, {
+        key: '_incrementCount',
+        value: function _incrementCount(name) {
+            if (this.count[name] === undefined) {
+                this.count[name] = 0;
+            }
+            this.count[name]++;
+        }
+
+        // needs improvement
+
+    }, {
+        key: '_handleError',
+        value: function _handleError(error) {
+            if (this.config.debug) {
+                console.error(error.title);
+            }
         }
     }]);
 
