@@ -80,15 +80,17 @@ class Inflect {
 
     // delete an element, but leave the non-empty children
     removeElement(el, task, callback) {
+        let actionName = 'removeElement'
         while (el.firstChild) {
             el.parentNode.insertBefore(el.firstChild, el)
         }
         el.parentNode.removeChild(el)
-        callback(null, 'removeElement')
+        callback(null, actionName)
     }
 
     // delete an attribute from an element
     removeAttribute(el, task, callback) {
+        let actionName = 'removeAttribute'
         switch (typeof task.attribute) {
             case 'string':
                 if (task.attribute === 'all') {
@@ -98,51 +100,70 @@ class Inflect {
                 } else {
                     el.removeAttribute(task.attribute)
                 }
-                callback(null, 'removeAttribute')
-                break;
+                callback(null, actionName)
+                break
             case 'object':
                 task.attribute.map((attr) => {
-                    el.removeAttribute(attr)
+                    if (typeof attr === 'string') {
+                        el.removeAttribute(attr)
+                        callback(null, actionName)
+                    } else if (attr.name) {
+                        el.removeAttribute(attr.name)
+                        callback(null, actionName)
+                    } else {
+                        callback(Error.ATTRIBUTE_NOT_VALID(task, attr))
+                    }
                 })
-                callback(null, 'removeAttribute')
-                break;
+                break
             case 'undefined':
-                callback(Error.ACTION_MISSING_KEY('removeAttribute', 'attribute'))
-                break;
+                callback(Error.ACTION_MISSING_KEY(task, actionName, 'attribute'))
+                break
             default:
-                callback()
+                callback(Error.ATTRIBUTE_NOT_VALID(task.attribute))
         }
     }
 
     // change tag by regexp replacing the opening and closing strings
     replaceTag(el, task, callback) {
+        let actionName = 'replaceTag'
         let newTag = (task.tag) ? task.tag.toLowerCase() : null
         let currentTag = el.nodeName.toLowerCase()
         if (!newTag) {
-            callback(Error.ACTION_MISSING_KEY('replaceTag', 'tag'))
+            callback(Error.ACTION_MISSING_KEY(task, actionName, 'tag'))
         } else if (currentTag !== newTag) {
             let openTag = new RegExp(`<${currentTag}\s*`, 'g')
             let closeTag = new RegExp(`/${currentTag}>`, 'g')
             el.outerHTML = el.outerHTML.replace(openTag, `<${newTag} `).replace(closeTag, `/${newTag}>`)
-            callback(null, 'replaceTag')
+            callback(null, actionName)
         }
     }
 
-    // attempt to dynamically fix the element when no action is given
-    fixElement(el, task, callback) {
-        this.replaceTag(el, task, (error, taskName) => {
-            callback(error, taskName)
-        })
-        this.setAttributes(el, task, (error, taskName) => {
-            callback(error, taskName)
-        })
-    }
-
     // set attributes on the element based on data in task object
-    setAttributes(el, task, callback) {
-        if (task[this.config.vocab]) {
-            el.setAttribute(VocabAttrName[this.config.vocab], task[this.config.vocab])
-            callback(null, 'setAttributes')
+    setAttribute(el, task, callback) {
+        let actionName = 'setAttribute'
+        switch (typeof task.attribute) {
+            case 'object':
+                // coerce attributes into an array for easier iteration
+                let attrs = (task.attribute[0] === undefined) ? Array.of(task.attribute) : task.attribute
+                attrs.map((attr) => {
+                    if (attr.name && attr.value) {
+                        el.setAttribute(attr.name, attr.value)
+                        callback(null, actionName)
+                    } else {
+                        callback(Error.ATTRIBUTE_MISSING_KEY(task, attr))
+                    }
+                })
+                break
+            case 'undefined':
+                if (task[this.config.vocab]) {
+                    el.setAttribute(VocabAttrName[this.config.vocab], task[this.config.vocab])
+                    callback(null, this.config.vocab)
+                } else {
+                    callback(Error.ACTION_MISSING_KEY(task, actionName, 'attribute'))
+                }
+                break
+            default:
+                callback(Error.ATTRIBUTE_NOT_VALID(task, task.attribute))
         }
     }
 
@@ -151,21 +172,19 @@ class Inflect {
         let elements = Array.from(this.doc.querySelectorAll(task.selector))
 
         elements.map((el) => {
-            if (this.config.removeWhitespace) {
-                this._removeWhitespace(el)
-            }
+            if (this.config.removeWhitespace) this._removeWhitespace(el)
 
             switch (typeof task.action) {
                 case 'function':
                     task.action.call(el, (error, taskName) => {
                         callback(error, taskName)
                     })
-                    break;
+                    break
                 case 'string':
                     this[task.action](el, task, (error, taskName) => {
                         callback(error, taskName)
                     })
-                    break;
+                    break
                 case 'object':
                     task.action.map((action) => {
                         if (typeof action === 'string') {
@@ -177,10 +196,8 @@ class Inflect {
                         }
                     })
                 case 'undefined':
-                    this.fixElement(el, task, (error, taskName) => {
-                        callback(error, taskName)
-                    })
-                    break;
+                    this._fixElement(el, task)
+                    break
                 default:
                     callback(ACTION_NOT_VALID(task.action))
             }
@@ -210,6 +227,22 @@ class Inflect {
         return tasks
     }
 
+    // attempt to dynamically fix the element when no action is given
+    _fixElement(el, task) {
+        if (task.attribute || task[this.config.vocab]) {
+            this.setAttribute(el, task, (error, taskName) => {
+                if (error) this._handleError(error)
+                if (taskName) this._incrementCount(taskName)
+            })
+        }
+        if (task.tag) {
+            this.replaceTag(el, task, (error, taskName) => {
+                if (error) this._handleError(error)
+                if (taskName) this._incrementCount(taskName)
+            })
+        }
+    }
+
     // returns true if the node is an empty text string
     _nodeIsEmpty(node) {
         // node exists, is a text node, and is empty after trim
@@ -231,6 +264,14 @@ class Inflect {
             if (!this._nodeIsEmpty(child)) newEl.appendChild(child)
         })
         return newEl
+    }
+
+    // increase the count for a specified count key
+    _incrementCount(name) {
+        if (this.count[name] === undefined) {
+            this.count[name] = 0
+        }
+        this.count[name]++
     }
 
     // needs improvement
