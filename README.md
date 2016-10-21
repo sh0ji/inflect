@@ -1,4 +1,4 @@
-# Inflect
+# (html-)inflect
 Inflect is a JavaScript module that improves the semantics of an HTML document. Its name comes from [semantic inflection](http://www.idpf.org/epub/301/spec/epub-contentdocs.html#sec-xhtml-semantic-inflection), which the IDPF defines as "the process of attaching additional meaning" to a document.
 
 ## Usage
