@@ -28,15 +28,27 @@ const VocabAttrName = {
 }
 
 const Error = {
-    ACTION_MISSING_KEY(action, missingKey) {
+    ACTION_MISSING_KEY(task, action, missingKey) {
         return {
-            title: `'${missingKey}' is missing for the task.`,
+            title: `The ${action} action requires an '${missingKey}' key and value.`,
             description: `The task must be in the format { action: ${action}, ${missingKey}: value }`
         }
     },
-    ACTION_NOT_VALID(action) {
+    ACTION_NOT_VALID(task, action) {
         return {
             title: `${action} is not a valid action.`
+        }
+    },
+    ATTRIBUTE_NOT_VALID(task, attribute) {
+        return {
+            title: `${attribute} is not a valid attribute.`,
+            description: `The attribute must be a string, an array of strings, or an object with a name key ({ name: 'href' }).`
+        }
+    },
+    ATTRIBUTE_MISSING_KEY(task, attribute) {
+        return {
+            title: `${attribute} is missing a key. Both the name and value keys are required.`,
+            description: `To set an attribute, format the attribute as an object with both a name key and a value key. e.g. [{ name: 'href', value: '#mylink' }]`
         }
     }
 }
