@@ -69,12 +69,7 @@ class Inflect {
             this.tasks.map((task) => {
                 this.runTask(task, (error, taskName) => {
                     if (error) this._handleError(error)
-                    if (taskName) {
-                        if (typeof this.count[taskName] === 'undefined') {
-                            this.count[taskName] = 0
-                        }
-                        this.count[taskName]++
-                    }
+                    if (taskName) this._incrementCount(taskName)
                 })
             })
         }
