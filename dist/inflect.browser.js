@@ -1,7 +1,7 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.htmlInflect = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 /**
  * --------------------------------------------------------------------------
- * Inflect (v1.1.0): inflect.js
+ * Inflect (v1.1.1): inflect.js
  * Cleanup, modify, and save messy HTML
  * by Evan Yamanishi
  * Licensed under GPL-3.0
@@ -23,7 +23,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var NAME = 'inflect';
-var VERSION = '1.1.0';
+var VERSION = '1.1.1';
 
 var Default = {
     autoRun: true,
@@ -206,7 +206,9 @@ var Inflect = function () {
 
                 switch (_typeof(task.action)) {
                     case 'function':
-                        task.action.call(el, function (error, taskName) {
+                        task.action.call(el, function (error, taskName, object) {
+                            // optionally attach an object to the class
+                            if (object) _this2[taskName] = object;
                             callback(error, taskName);
                         });
                         break;

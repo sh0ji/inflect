@@ -1,6 +1,6 @@
 /**
  * --------------------------------------------------------------------------
- * Inflect (v1.1.0): inflect.js
+ * Inflect (v1.1.1): inflect.js
  * Cleanup, modify, and save messy HTML
  * by Evan Yamanishi
  * Licensed under GPL-3.0
@@ -12,7 +12,7 @@
 // CONSTANTS
 
 const NAME = 'inflect'
-const VERSION = '1.1.0'
+const VERSION = '1.1.1'
 
 const Default = {
     autoRun: true,
@@ -175,7 +175,9 @@ class Inflect {
 
             switch (typeof task.action) {
                 case 'function':
-                    task.action.call(el, (error, taskName) => {
+                    task.action.call(el, (error, taskName, object) => {
+                        // optionally attach an object to the class
+                        if (object) this[taskName] = object
                         callback(error, taskName)
                     })
                     break

@@ -1,6 +1,6 @@
 /**
  * --------------------------------------------------------------------------
- * Inflect (v1.1.0): inflect.js
+ * Inflect (v1.1.1): inflect.js
  * Cleanup, modify, and save messy HTML
  * by Evan Yamanishi
  * Licensed under GPL-3.0
@@ -22,7 +22,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var NAME = 'inflect';
-var VERSION = '1.1.0';
+var VERSION = '1.1.1';
 
 var Default = {
     autoRun: true,
@@ -205,7 +205,9 @@ var Inflect = function () {
 
                 switch (_typeof(task.action)) {
                     case 'function':
-                        task.action.call(el, function (error, taskName) {
+                        task.action.call(el, function (error, taskName, object) {
+                            // optionally attach an object to the class
+                            if (object) _this2[taskName] = object;
                             callback(error, taskName);
                         });
                         break;
