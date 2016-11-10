@@ -1,7 +1,7 @@
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.htmlInflect = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 /**
  * --------------------------------------------------------------------------
- * Inflect (v1.1.1): inflect.js
+ * Inflect (v1.1.2): inflect.js
  * Cleanup, modify, and save messy HTML
  * by Evan Yamanishi
  * Licensed under GPL-3.0
@@ -23,7 +23,7 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var NAME = 'inflect';
-var VERSION = '1.1.1';
+var VERSION = '1.1.2';
 
 var Default = {
     autoRun: true,
@@ -163,21 +163,43 @@ var Inflect = function () {
         // set attributes on the element based on data in task object
 
     }, {
-        key: 'setAttribute',
-        value: function setAttribute(el, task, callback) {
+        key: 'setAttributes',
+        value: function setAttributes(el, task, callback) {
             var actionName = 'setAttribute';
             switch (_typeof(task.attribute)) {
                 case 'object':
                     // coerce attributes into an array for easier iteration
                     var attrs = task.attribute[0] === undefined ? Array.of(task.attribute) : task.attribute;
-                    attrs.map(function (attr) {
-                        if (attr.name && attr.value) {
-                            el.setAttribute(attr.name, attr.value);
-                            callback(null, actionName);
-                        } else {
-                            callback(Error.ATTRIBUTE_MISSING_KEY(task, attr));
+                    var _iteratorNormalCompletion = true;
+                    var _didIteratorError = false;
+                    var _iteratorError = undefined;
+
+                    try {
+                        for (var _iterator = attrs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                            var attr = _step.value;
+
+                            if (attr.name && attr.value) {
+                                el.setAttribute(attr.name, attr.value);
+                                callback(null, actionName);
+                            } else {
+                                callback(Error.ATTRIBUTE_MISSING_KEY(task, attr));
+                            }
                         }
-                    });
+                    } catch (err) {
+                        _didIteratorError = true;
+                        _iteratorError = err;
+                    } finally {
+                        try {
+                            if (!_iteratorNormalCompletion && _iterator.return) {
+                                _iterator.return();
+                            }
+                        } finally {
+                            if (_didIteratorError) {
+                                throw _iteratorError;
+                            }
+                        }
+                    }
+
                     break;
                 case 'undefined':
                     if (task[this.config.vocab]) {
@@ -189,6 +211,11 @@ var Inflect = function () {
                     break;
                 default:
                     callback(Error.ATTRIBUTE_NOT_VALID(task, task.attribute));
+            }
+            // always add vocab type attributes if specified
+            if (task[this.config.vocab]) {
+                el.setAttribute(VocabAttrName[this.config.vocab], task[this.config.vocab]);
+                callback(null, this.config.vocab);
             }
         }
 
@@ -207,8 +234,11 @@ var Inflect = function () {
                 switch (_typeof(task.action)) {
                     case 'function':
                         task.action.call(el, function (error, taskName, object) {
-                            // optionally attach an object to the class
-                            if (object) _this2[taskName] = object;
+                            // optionally attach an object to the Inflect class
+                            if (object) {
+                                if (!_this2[taskName]) _this2[taskName] = [];
+                                _this2[taskName].push(object);
+                            }
                             callback(error, taskName);
                         });
                         break;
@@ -272,7 +302,7 @@ var Inflect = function () {
             var _this3 = this;
 
             if (task.attribute || task[this.config.vocab]) {
-                this.setAttribute(el, task, function (error, taskName) {
+                this.setAttributes(el, task, function (error, taskName) {
                     if (error) _this3._handleError(error);
                     if (taskName) _this3._incrementCount(taskName);
                 });

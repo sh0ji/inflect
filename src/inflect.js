@@ -1,6 +1,6 @@
 /**
  * --------------------------------------------------------------------------
- * Inflect (v1.1.1): inflect.js
+ * Inflect (v1.1.2): inflect.js
  * Cleanup, modify, and save messy HTML
  * by Evan Yamanishi
  * Licensed under GPL-3.0
@@ -12,7 +12,7 @@
 // CONSTANTS
 
 const NAME = 'inflect'
-const VERSION = '1.1.1'
+const VERSION = '1.1.2'
 
 const Default = {
     autoRun: true,
@@ -138,20 +138,20 @@ class Inflect {
     }
 
     // set attributes on the element based on data in task object
-    setAttribute(el, task, callback) {
+    setAttributes(el, task, callback) {
         let actionName = 'setAttribute'
         switch (typeof task.attribute) {
             case 'object':
                 // coerce attributes into an array for easier iteration
                 let attrs = (task.attribute[0] === undefined) ? Array.of(task.attribute) : task.attribute
-                attrs.map((attr) => {
+                for (let attr of attrs) {
                     if (attr.name && attr.value) {
                         el.setAttribute(attr.name, attr.value)
                         callback(null, actionName)
                     } else {
                         callback(Error.ATTRIBUTE_MISSING_KEY(task, attr))
                     }
-                })
+                }
                 break
             case 'undefined':
                 if (task[this.config.vocab]) {
@@ -163,6 +163,11 @@ class Inflect {
                 break
             default:
                 callback(Error.ATTRIBUTE_NOT_VALID(task, task.attribute))
+        }
+        // always add vocab type attributes if specified
+        if (task[this.config.vocab]) {
+            el.setAttribute(VocabAttrName[this.config.vocab], task[this.config.vocab])
+            callback(null, this.config.vocab)
         }
     }
 
@@ -176,8 +181,11 @@ class Inflect {
             switch (typeof task.action) {
                 case 'function':
                     task.action.call(el, (error, taskName, object) => {
-                        // optionally attach an object to the class
-                        if (object) this[taskName] = object
+                        // optionally attach an object to the Inflect class
+                        if (object) {
+                            if (!this[taskName]) this[taskName] = []
+                            this[taskName].push(object)
+                        }
                         callback(error, taskName)
                     })
                     break
@@ -231,7 +239,7 @@ class Inflect {
     // attempt to dynamically fix the element when no action is given
     _fixElement(el, task) {
         if (task.attribute || task[this.config.vocab]) {
-            this.setAttribute(el, task, (error, taskName) => {
+            this.setAttributes(el, task, (error, taskName) => {
                 if (error) this._handleError(error)
                 if (taskName) this._incrementCount(taskName)
             })
