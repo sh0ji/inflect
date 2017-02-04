@@ -1,6 +1,6 @@
 /**
  * --------------------------------------------------------------------------
- * Inflect (v1.0.2): inflect.js
+ * Inflect (v1.0.3): inflect.js
  * Cleanup, modify, and save messy HTML
  * by Evan Yamanishi
  * Licensed under GPL-3.0
@@ -12,7 +12,7 @@
 // CONSTANTS
 
 const NAME = 'inflect'
-const VERSION = '1.0.2'
+const VERSION = '1.0.3'
 
 const Default = {
     includeInDesignTasks: true,
@@ -95,9 +95,11 @@ class Inflect {
 
         // change tag by regexp replacing the opening and closing strings
         if (newTag && currentTag !== newTag) {
-            let openTag = new RegExp(`<${currentTag} `, 'g')
+            let openTag = new RegExp(`<${currentTag}(\s*)`, 'g')
             let closeTag = new RegExp(`/${currentTag}>`, 'g')
-            el.outerHTML = el.outerHTML.replace(openTag, `<${newTag} `).replace(closeTag, `/${newTag}>`)
+            el.outerHTML = el.outerHTML
+                .replace(openTag, `<${newTag}$1`)
+                .replace(closeTag, `/${newTag}>`)
         }
         this.setAttributes(el, item)
     }

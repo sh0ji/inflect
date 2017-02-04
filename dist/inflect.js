@@ -1,6 +1,6 @@
 /**
  * --------------------------------------------------------------------------
- * Inflect (v1.0.2): inflect.js
+ * Inflect (v1.0.3): inflect.js
  * Cleanup, modify, and save messy HTML
  * by Evan Yamanishi
  * Licensed under GPL-3.0
@@ -15,14 +15,14 @@ Object.defineProperty(exports, "__esModule", {
     value: true
 });
 
-var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol ? "symbol" : typeof obj; };
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
 var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var NAME = 'inflect';
-var VERSION = '1.0.2';
+var VERSION = '1.0.3';
 
 var Default = {
     includeInDesignTasks: true,
@@ -177,9 +177,9 @@ var Inflect = function () {
 
             // change tag by regexp replacing the opening and closing strings
             if (newTag && currentTag !== newTag) {
-                var openTag = new RegExp('<' + currentTag + ' ', 'g');
+                var openTag = new RegExp('<' + currentTag + '(s*)', 'g');
                 var closeTag = new RegExp('/' + currentTag + '>', 'g');
-                el.outerHTML = el.outerHTML.replace(openTag, '<' + newTag + ' ').replace(closeTag, '/' + newTag + '>');
+                el.outerHTML = el.outerHTML.replace(openTag, '<' + newTag + '$1').replace(closeTag, '/' + newTag + '>');
             }
             this.setAttributes(el, item);
         }
