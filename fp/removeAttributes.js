@@ -1,16 +1,18 @@
-'use strict'
+'use strict';
 
-const flattenDeep = require('lodash/fp/flattenDeep')
+const flattenDeep = require('lodash/fp/flattenDeep');
 
-module.exports.removeAttributes = (el, ...attributes) => {
+const removeAttributes = (el, ...attributes) => {
     return new Promise((resolve, reject) => {
-        attributes = flattenDeep(attributes.map(attr => attr.split(/,\s*/)))
+        attributes = flattenDeep(attributes.map(attr => attr.split(/,\s*/)));
         attributes = (attributes.includes('all')) ?
             Array.from(el.attributes).map(attr => attr.name) :
-            attributes
+            attributes;
         for (let i = 0; i < attributes.length; i++) {
-            el.removeAttribute(attributes[i])
+            el.removeAttribute(attributes[i]);
         }
-        resolve()
+        resolve();
     })
 }
+
+module.exports = removeAttributes;
