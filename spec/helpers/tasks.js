@@ -2,7 +2,7 @@
 
 const changeTag1 = {
     selector: '#target',
-    function: 'changeTag',
+    action: 'changeTag',
     parameter: 'blockquote',
     expect: 'blockquote',
     name: 'changeTag1'
@@ -11,7 +11,7 @@ module.exports.changeTag1 = changeTag1
 
 const function1 = {
     selector: '#innertarget',
-    function: (el) => {
+    action: (el) => {
         return new Promise((resolve, reject) => {
             el.innerHTML = el.innerHTML.replace('Totam', 'Evan')
             resolve([tasks1, 'evan'])
@@ -24,7 +24,7 @@ module.exports.function1 = function1
 
 const setRole1 = {
     selector: '#innertarget',
-    function: 'setRole',
+    action: 'setRole',
     parameter: ['link', 'list', ['presentation', 'not a role']],
     expect: 'link list presentation not a role',
     name: 'setRole1'
@@ -33,7 +33,7 @@ module.exports.setRole1 = setRole1
 
 const setEpubType1 = {
     selector: 'li',
-    function: 'setEpubType',
+    action: 'setEpubType',
     parameter: 'pagebreak',
     expect: 'pagebreak',
     name: 'setEpubType1'
@@ -42,7 +42,7 @@ module.exports.setEpubType1 = setEpubType1
 
 const function2 = {
     selector: '#innertarget',
-    function: (el) => {
+    action: (el) => {
         return new Promise((resolve, reject) => {
             el.innerHTML = el.innerHTML.replace('quo placeat', 'is the best!')
             resolve([function3, 'evan'])
@@ -55,7 +55,7 @@ module.exports.function2 = function2
 
 const function3 = {
     selector: 'pre',
-    function: (el) => {
+    action: (el) => {
         return new Promise((resolve, reject) => {
             Inflect.removeAttributes(el, 'all')
             resolve([function4, 'removeAttributes'])
@@ -68,7 +68,7 @@ module.exports.function3 = function3
 
 const function4 = {
     selector: '#innertarget',
-    function: (el) => {
+    action: (el) => {
         return new Promise((resolve, reject) => {
             el.innerHTML = el.innerHTML.replace(/(Evan is the best\!)/, '<span class="best">$1</span>')
             resolve('evan')

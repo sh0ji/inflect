@@ -10,10 +10,10 @@
 'use strict';
 
 const assert = require('assert');
-const changeTag = require('./fp/changeTag');
-const removeAttributes = require('./fp/removeAttributes');
-const removeElement = require('./fp/removeElement');
-const setSemantics = require('./fp/setSemantics');
+const changeTag = require('./action/changeTag');
+const removeAttributes = require('./action/removeAttributes');
+const removeElement = require('./action/removeElement');
+const setSemantics = require('./action/setSemantics');
 
 const NAME = 'html-inflect';
 const VERSION = '2.0.0';
@@ -42,14 +42,14 @@ class Inflect {
 
     runTask(task) {
         assert(task.selector, 'A selector is required');
-        assert(typeof task.function === 'function' ||
-            typeof Inflect[task.function] === 'function',
-            `${task.function} is not a valid function`);
+        assert(typeof task.action === 'function' ||
+            typeof Inflect[task.action] === 'function',
+            `${task.action} is not a valid function`);
 
         Array.from(this.doc.querySelectorAll(task.selector)).forEach((el) => {
-            let fn = (typeof Inflect[task.function] === 'function') ?
-                Inflect[task.function] :
-                task.function;
+            let fn = (typeof Inflect[task.action] === 'function') ?
+                Inflect[task.action] :
+                task.action;
             fn(el, task.parameter).then((result) => {
                 result = result || fn.name;
                 this._processResults;
