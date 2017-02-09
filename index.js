@@ -26,6 +26,7 @@ class Inflect {
             assert(typeof doc === 'object', 'A document object is required');
             this.doc = doc;
         }
+        this.count = {};
     }
 
     get name() {
@@ -34,10 +35,6 @@ class Inflect {
 
     get version() {
         return VERSION;
-    }
-
-    get count() {
-        return this._count || {};
     }
 
     runTask(task) {
@@ -83,9 +80,9 @@ class Inflect {
     }
 
     _incrementCount(key) {
-        this._count[key] = (this._count[key] === undefined) ?
-            0 :
-            this._count[key] + 1;
+        this.count[key] = (this.count[key] === undefined) ?
+            1 :
+            this.count[key] + 1;
     }
 
     static changeTag(el, newTag) {
