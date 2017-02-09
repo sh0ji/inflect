@@ -13,7 +13,7 @@ const changeTag = (el, newTag) => {
                 .replace(closeTag, `/${newTag}>`);
         }
         resolve();
-    })
-}
+    });
+};
 
 module.exports = changeTag;

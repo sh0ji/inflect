@@ -9,7 +9,7 @@ const removeElement = (el, keepChildren) => {
         }
         el.parentNode.removeChild(el);
         resolve();
-    })
-}
+    });
+};
 
 module.exports = removeElement;

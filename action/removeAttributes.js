@@ -12,7 +12,7 @@ const removeAttributes = (el, ...attributes) => {
             el.removeAttribute(attributes[i]);
         }
         resolve();
-    })
-}
+    });
+};
 
 module.exports = removeAttributes;

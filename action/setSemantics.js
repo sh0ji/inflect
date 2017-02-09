@@ -10,6 +10,6 @@ const setSemantics = (el, attr, ...values) => {
         el.setAttribute(attr, values);
         resolve();
     })
-}
+};
 
 module.exports = setSemantics;
