@@ -19,7 +19,7 @@ A task is an object with two required keys: a `selector`, and an `action`. The t
 let myTask = {
     selector: '.h3',
     action: 'changeTag',
-    parameter: 'h2'
+    parameter: 'h3'
 };
 ```
 `selector` | String
@@ -65,7 +65,7 @@ const Inflect = require('html-inflect');
 let myTask = {
     selector: '.h3',
     action: 'changeTag',
-    parameter: 'h2'
+    parameter: 'h3'
 };
 
 // get your document
