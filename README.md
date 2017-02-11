@@ -1,5 +1,5 @@
 # html-inflect
-html-inflect is a tool for cleaning up and improving the semantics of HTML in a Node.js environment. Its name comes from [semantic inflection](http://www.idpf.org/epub/301/spec/epub-contentdocs.html#sec-xhtml-semantic-inflection), which the IDPF defines as "the process of attaching additional meaning" to a document.
+html-inflect is a tool for cleaning up and improving the semantics of HTML in a Node.js environment. Its name comes from [semantic inflection](http://www.idpf.org/epub/31/spec/epub-mediaoverlays.html#sec-docs-semantic-inflection), which the IDPF defines as "the process of attaching additional meaning" to a document.
 
 ## Usage
 html-inflect must be instantiated with a document object, and then The only parameter for instantiation is a document object. When used in the browser, html-inflect will always use the actual `document` object.
