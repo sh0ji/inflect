@@ -1,31 +1,34 @@
 {
   "name": "html-inflect",
-  "version": "1.1.1",
+  "version": "2.0.0",
   "description": "Cleanup, modify, and save messy HTML",
-  "main": "dist/inflect.module.js",
+  "main": "index.js",
   "scripts": {
-    "clean": "del-cli dist/*",
-    "build-browser": "browserify src/inflect.js -s html-inflect -t [ babelify --presets [ es2015 ] --plugins [ add-module-exports ] ] | derequire > dist/inflect.browser.js",
-    "build-node": "babel src/inflect.js -o dist/inflect.module.js",
-    "prepublish": "npm run build-browser & npm run build-node"
+    "clean-deps": "rimraf node_modules",
+    "build": "browserify index.js > dist/html-inflect.js -t [ babelify --presets [ es2015 ] ] -s Inflect",
+    "minify": "browserify -g uglifyify index.js > dist/html-inflect.min.js -t [ babelify --presets [ es2015 ] ] -s Inflect",
+    "prepublish": "npm run test && npm run build && npm run minify",
+    "test": "node ./node_modules/jasmine/bin/jasmine.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/sh0ji/inflect.git"
   },
   "author": "Evan Yamanishi",
-  "license": "MIT",
+  "license": "GPL-3.0",
   "bugs": {
     "url": "https://github.com/sh0ji/inflect/issues"
   },
   "homepage": "https://github.com/sh0ji/inflect#readme",
   "devDependencies": {
-    "babel-cli": "^6.14.0",
-    "babel-plugin-add-module-exports": "^0.2.1",
-    "babel-preset-es2015": "^6.14.0",
+    "babel-preset-es2015": "^6.22.0",
     "babelify": "^7.3.0",
-    "browserify": "^13.1.0",
-    "del-cli": "^0.2.0",
-    "derequire": "^2.0.3"
+    "browserify": "^14.0.0",
+    "jasmine": "^2.5.3",
+    "jsdom": "^9.10.0",
+    "uglifyify": "^3.0.4"
+  },
+  "dependencies": {
+    "lodash": "^4.17.4"
   }
 }
