@@ -17,14 +17,8 @@ const setSemantics = require('./action/setSemantics');
 
 class Inflect {
     constructor(doc) {
-        try {
-            if (document instanceof HTMLDocument) this.doc = document;
-        } catch (err) {
-            assert(typeof doc === 'object', 'A document object is required');
-            this.doc = doc;
-        }
-        this.count = {};
-    }
+        assert(typeof doc === 'object', 'A document object is required');
+        this.doc = doc || document; // eslint-disable-line no-undef
     }
 
     runTask(task) {
