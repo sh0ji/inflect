@@ -15,9 +15,6 @@ const removeAttributes = require('./action/removeAttributes');
 const removeElement = require('./action/removeElement');
 const setSemantics = require('./action/setSemantics');
 
-const NAME = 'html-inflect';
-const VERSION = '2.0.0';
-
 class Inflect {
     constructor(doc) {
         try {
@@ -28,13 +25,6 @@ class Inflect {
         }
         this.count = {};
     }
-
-    get name() {
-        return NAME;
-    }
-
-    get version() {
-        return VERSION;
     }
 
     runTask(task) {
