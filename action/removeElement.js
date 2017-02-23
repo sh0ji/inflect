@@ -1,5 +1,3 @@
-'use strict';
-
 const removeElement = (el, keepChildren) => {
     return new Promise((resolve, reject) => {
         if (keepChildren) {

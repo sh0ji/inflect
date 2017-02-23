@@ -1,14 +1,12 @@
-'use stric';
-
-const changeTag = (el, newTag) => {
+const changeTag = (el, tag) => {
     return new Promise((resolve, reject) => {
-        let currentTag = el.tagName.toLowerCase();
-        newTag = newTag.toLowerCase();
+        const currentTag = el.tagName.toLowerCase();
+        const newTag = tag.toLowerCase();
 
         if (newTag && currentTag !== newTag) {
-            let openTag = new RegExp(`<${currentTag}(\\s*)`);
-            let closeTag = new RegExp(`\\/${currentTag}>`);
-            el.outerHTML = el.outerHTML
+            const openTag = new RegExp(`<${currentTag}(\\s*)`);
+            const closeTag = new RegExp(`\\/${currentTag}>`);
+            el.outerHTML = el.outerHTML             // eslint-disable-line
                 .replace(openTag, `<${newTag}$1`)
                 .replace(closeTag, `/${newTag}>`);
         }
