@@ -1,9 +1,8 @@
-'use strict';
-
+/* eslint-disable */
 const fs = require('fs');
 const jsdom = require('jsdom');
 const Inflect = require('../index');
-const fileHtml = './spec/helpers/html.html';
+const fileHtml = './spec/helpers/test.html';
 
 describe('Inflect', function() {
     let inflect = null;
@@ -25,20 +24,15 @@ describe('Inflect', function() {
         expect(inflect.doc.body).not.toBeUndefined();
     });
 
-    describe('Getters', function() {
-        let pkg = require('../package.json');
-
-        it('version should be equal to the current npm version', function() {
-            expect(inflect.version).toEqual(pkg.version);
-        });
-
-        it('name should be equal to the current npm name', function() {
-            expect(inflect.name).toEqual(pkg.name);
-        });
-    });
-
-    describe('Task runner', function() {
+    describe('task runner', function() {
         let tasks = require('./helpers/tasks.js');
+
+        it('should set the role on the target', function() {
+            let task = tasks.setRole1;
+            inflect.runTask(task);
+            let target = inflect.doc.querySelector(task.selector);
+            expect(target.getAttribute('role')).toEqual(task.expect);
+        });
 
         describe('changeTag action', function() {
             let task = tasks.changeTag1;
@@ -53,18 +47,27 @@ describe('Inflect', function() {
             });
         });
 
-        it('should set the role on the target', function() {
-            let task = tasks.setRole1;
-            inflect.runTask(task);
-            let target = inflect.doc.querySelector(task.selector);
-            expect(target.getAttribute('role')).toEqual(task.expect);
-        });
-
-        describe('Run an array of tasks', function() {
-            let task = tasks.array1;
+        describe('add to data array', function() {
+            let task = tasks.function5;
 
             beforeEach(function(done) {
-                inflect.runTasks(task).then(() =>done());
+                inflect.runTask(task).then(() => done());
+            });
+
+            it('should should be the first li in the document', function() {
+                expect(inflect.data.listItem[0]).toEqual(task.expect);
+            });
+
+            it('should add all the li', function() {
+                expect(inflect.data.listItem.length).toEqual(5);
+            });
+        });
+
+        describe('run an array of tasks', function() {
+            let task = tasks.array;
+
+            beforeEach(function(done) {
+                inflect.runTasks(task).then(() => done());
             });
 
             it('should change content in steps', function() {
@@ -76,10 +79,10 @@ describe('Inflect', function() {
             });
 
             it('should iterate the counts', function() {
-                expect(inflect.count.changeTag).toEqual(1);
-                expect(inflect.count.evan).toEqual(2);
-                expect(inflect.count.removeAttributes).toEqual(1);
-                expect(inflect.count.setRole).toEqual(1);
+                expect(inflect.data.changeTag.length).toEqual(1);
+                expect(inflect.data.evan.length).toEqual(2);
+                expect(inflect.data.removeAttributes.length).toEqual(1);
+                expect(inflect.data.setRole.length).toEqual(1);
             })
         });
     });

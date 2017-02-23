@@ -16,7 +16,10 @@ const function1 = {
     action: (el) => {
         return new Promise((resolve, reject) => {
             el.innerHTML = el.innerHTML.replace('Totam', 'Evan')
-            resolve([function2, 'evan'])
+            resolve({
+                name: 'evan',
+                value: 'Totam'
+            });
         })
     },
     expect: 'Evan',
@@ -47,7 +50,7 @@ const function2 = {
     action: (el) => {
         return new Promise((resolve, reject) => {
             el.innerHTML = el.innerHTML.replace('quo placeat', 'is the best!')
-            resolve(function3)
+            resolve();
         })
     },
     expect: 'pagebreak',
@@ -60,7 +63,7 @@ const function3 = {
     action: (el) => {
         return new Promise((resolve, reject) => {
             Inflect.removeAttributes(el, 'all')
-            resolve([function4, 'removeAttributes'])
+            resolve({ name: 'removeAttributes' });
         })
     },
     expect: null,
@@ -73,7 +76,7 @@ const function4 = {
     action: (el) => {
         return new Promise((resolve, reject) => {
             el.innerHTML = el.innerHTML.replace(/(Evan is the best\!)/, '<span class="best">$1</span>')
-            resolve('evan')
+            resolve({ name: 'evan' });
         })
     },
     expect: '<span class="best">Evan is the best!</span>',
@@ -81,7 +84,20 @@ const function4 = {
 };
 module.exports.function4 = function4;
 
-const array1 = [changeTag1, function1, setRole1];
-const array2 = [setEpubType1, function2];
-module.exports.array1 = array1;
-module.exports.array2 = array2;
+const function5 = {
+    selector: 'li',
+    action: (el) => {
+        return new Promise((resolve) => {
+            resolve({
+                name: 'listItem',
+                value: el.outerHTML
+            });
+        });
+    },
+    expect: '<li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</li>'
+}
+module.exports.function5 = function5;
+
+module.exports.array = [
+    changeTag1, setRole1, function1, function2, function3, function4
+];
