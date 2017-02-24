@@ -106,12 +106,6 @@ class Inflect {
         return this;
     }
 
-    _incrementCount(key) {
-        this.count[key] = (this.count[key] === undefined) ?
-            1 :
-            this.count[key] + 1;
-    }
-
     static changeTag(el, newTag) {
         return changeTag(el, newTag);
     }
