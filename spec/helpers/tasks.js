@@ -98,6 +98,27 @@ const function5 = {
 }
 module.exports.function5 = function5;
 
+const functionRemove = {
+    selector: 'blockquote',
+    action: (el) => {
+        return new Promise((resolve) => {
+            this.removeContainer(el);
+            resolve();
+        });
+    }
+};
+module.exports.functionRemove = functionRemove;
+
+const sync = {
+    selector: '#innertarget',
+    action: (el) => {
+        el.classList.add('sync');
+    },
+    expect: 'sync',
+    name: 'sync'
+};
+module.exports.sync = sync;
+
 module.exports.array = [
     changeTag1, setRole1, function1, function2, function3, function4
 ];

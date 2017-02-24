@@ -47,7 +47,32 @@ describe('Inflect', function() {
             });
         });
 
-        describe('add to data array', function() {
+        describe('use constructor this inside function action', function() {
+            let task = tasks.functionRemove;
+
+            beforeEach(function(done) {
+                inflect.runTask(task).then(() => done());
+            });
+
+            it('should remove the blockquote', function() {
+                expect(inflect.doc.body.children[3].nodeName).toEqual('P');
+            });
+        });
+
+        describe('run a synchronous task', function() {
+            let task = tasks.sync;
+
+            beforeEach(function() {
+                inflect.runTask(task);
+            });
+
+            it('should have the `sync` class', function() {
+                let target = inflect.doc.querySelector(task.selector);
+                expect(target.classList.contains(task.expect)).toEqual(true);
+            });
+        });
+
+        describe('add to data object', function() {
             let task = tasks.function5;
 
             beforeEach(function(done) {
