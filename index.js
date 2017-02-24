@@ -7,7 +7,13 @@ const Doc = Symbol('doc');
 
 class Inflect {
     constructor(doc) {
-        this.doc = doc || document; // eslint-disable-line no-undef
+        if (doc) this.doc = doc || document; // eslint-disable-line no-undef
+        /** attach static methods for use inside anonymous action functions */
+        this.changeTag = Inflect.changeTag;
+        this.removeAttributes = Inflect.removeAttributes;
+        this.removeContainer = Inflect.removeContainer;
+        this.setEpubType = Inflect.setEpubType;
+        this.setRole = Inflect.setRole;
     }
 
     get doc() {
