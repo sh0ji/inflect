@@ -30,12 +30,18 @@ class Inflect {
                     const action = (typeof Inflect[task.action] === 'function') ?
                         Inflect[task.action] :
                         task.action;
-                    action(el, task.parameter)
-                        .then((result) => {
-                            const res = result || { name: action.name };
-                            results.push(res);
-                        })
-                        .catch(err => reject(err));
+                    const func = action.call(this, el, task.parameter);
+                    if (func) {
+                        if (func.then) {
+                            func.then((result) => {
+                                const res = result || { name: action.name };
+                                results.push(res);
+                            })
+                            .catch(err => reject(err));
+                        } else {
+                            results.push(func);
+                        }
+                    }
                 });
                 resolve(results);
             } catch (err) {
