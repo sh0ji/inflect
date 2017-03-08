@@ -27,7 +27,6 @@
     "eslint-plugin-jsx-a11y": "^4.0.0",
     "eslint-plugin-react": "^6.10.0",
     "jasmine": "^2.5.3",
-    "jsdom": "^9.10.0",
     "uglifyify": "^3.0.4"
   },
   "dependencies": {
