@@ -36,9 +36,9 @@ class Inflect extends EventEmitter {
     get report() {
         const report = {
             file: this.file,
-            tasks: this.count,
-            data: this.data
+            tasks: this.count
         };
+        if (this.data.length) report.data = this.data;
         if (this.errors.length) report.errors = this.errors;
         return report;
     }
@@ -80,20 +80,12 @@ class Inflect extends EventEmitter {
             this[action] = actions[action];
         });
 
-        /** setup listeners */
+        /** setup action listener */
         this.on('actionEnd', (err, task) => {
             if (err) this.handleError(err, task);
             if (task.elements.every(el => el.done)) {
                 task.markDone();
                 this.emit('taskEnd', task);
-            }
-        });
-
-        this.on('taskEnd', () => {
-            if (this.tasks.every(t => t.done === true) ||
-                this.tasks.length === 0) {
-                this.done = true;
-                this.emit('done', this.report);
             }
         });
 
@@ -109,12 +101,25 @@ class Inflect extends EventEmitter {
     }
 
     inflect() {
-        this.emit('start');
-        for (let i = 0; i < this.tasks.length; i += 1) {
-            this.runTask(this.tasks[i]);
-        }
+        return new Promise((resolve, reject) => {
+            try {
+                this.emit('start');
+                for (let i = 0; i < this.tasks.length; i += 1) {
+                    this.runTask(this.tasks[i]);
+                }
 
-        return this;
+                this.on('taskEnd', () => {
+                    if (this.tasks.every(t => t.done === true) ||
+                        this.tasks.length === 0) {
+                        this.done = true;
+                        this.emit('done', this.report);
+                        resolve(this.report);
+                    }
+                });
+            } catch (err) {
+                reject(err);
+            }
+        });
     }
 
     runTask(task) {
