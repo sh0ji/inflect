@@ -1,137 +1,212 @@
-const changeTag = require('./action/changeTag');
-const removeAttributes = require('./action/removeAttributes');
-const removeElement = require('./action/removeElement');
-const setSemantics = require('./action/setSemantics');
+const fs = require('fs');
+const path = require('path');
+const jsdom = require('jsdom');
+const Task = require('./lib/Task');
+const EventEmitter = require('events').EventEmitter;
+const actions = require('./lib/actions');
 
-const Doc = Symbol('doc');
+const jsdomConfig = {
+    /**
+     * @type {Object}
+     * @see https://github.com/tmpvar/jsdom#flexibility
+     */
+    features: {
+        FetchExternalResources: false,
+        ProcessExternalResources: false,
+        SkipExternalResources: true
+    }
+};
 
-class Inflect {
-    constructor(doc) {
-        if (doc) this.doc = doc || document; // eslint-disable-line no-undef
-        /** attach static methods for use inside anonymous action functions */
-        this.changeTag = Inflect.changeTag;
-        this.removeAttributes = Inflect.removeAttributes;
-        this.removeContainer = Inflect.removeContainer;
-        this.setEpubType = Inflect.setEpubType;
-        this.setRole = Inflect.setRole;
+const Tasks = Symbol('tasks');
+
+class Inflect extends EventEmitter {
+    constructor(file) {
+        super();
+        if (file) this.init(file);
     }
 
-    get doc() {
-        return this[Doc];
+    get basename() {
+        return path.basename(this.file);
     }
 
-    set doc(value) {
-        if (typeof value === 'object') {
-            this[Doc] = value;
-        } else {
-            console.log('doc must be a document object');   // eslint-disable-line
+    get total() {
+        return this.tasks.reduce((acc, task) => acc + task.elements.length, 0);
+    }
+
+    get report() {
+        const report = {
+            file: this.file,
+            tasks: this.count,
+            data: this.data
+        };
+        if (this.errors.length) report.errors = this.errors;
+        return report;
+    }
+
+    get tasks() {
+        return this[Tasks];
+    }
+
+    set tasks(value) {
+        if (typeof value !== 'object') {
+            throw new Error(`${value} is not a valid task.`);
         }
+
+        let arr = value;
+        if (value.constructor !== Array) {
+            arr = [value];
+        }
+        this.addTask(arr);
+
+        return this;
     }
 
-    runTask(task) {
-        return new Promise((resolve, reject) => {
-            try {
-                const results = [];
-                Array.from(this.doc.querySelectorAll(task.selector)).forEach((el) => {
-                    const action = (typeof Inflect[task.action] === 'function') ?
-                        Inflect[task.action] :
-                        task.action;
-                    const func = action.call(this, el, task.parameter);
-                    if (func) {
-                        if (func.then) {
-                            func.then((result) => {
-                                const res = result || { name: action.name };
-                                results.push(res);
-                            })
-                            .catch(err => reject(err));
-                        } else {
-                            results.push(func);
-                        }
-                    }
-                });
-                resolve(results);
-            } catch (err) {
-                reject(err);
-            }
-        })
-        .then(res => this.processResults(res))
-        .catch(err => console.log(err));    // eslint-disable-line no-console
-    }
+    init(file) {
+        this.file = file;
 
-    runTasks(tasks) {
-        return new Promise((resolve, reject) => {
-            this.asyncTasks(tasks, 0)
-                .then(() => resolve())
-                .catch(err => reject(err));
-        })
-        .catch(err => console.log(err));    // eslint-disable-line no-console
-    }
+        /** setup jsdom */
+        const data = fs.readFileSync(this.file);
+        this.doc = jsdom.jsdom(data, jsdomConfig);
 
-    asyncTasks(taskArr, index) {
-        return new Promise((resolve, reject) => {
-            this.runTask(taskArr[index]).then(() => {
-                const i = index + 1;
-                if (i < taskArr.length) {
-                    this.asyncTasks(taskArr, i)
-                        .then(() => resolve())
-                        .catch(err => reject(err));
-                } else {
-                    resolve();
-                }
-            });
+        this[Tasks] = [];
+
+        this.done = false;
+        this.count = {};
+        this.data = {};
+        this.errors = [];
+
+        /** add actions to this instance */
+        Object.keys(actions).forEach((action) => {
+            this[action] = actions[action];
         });
-    }
 
-    processResults(results) {
-        results.forEach((result) => {
-            const res = {};
-            if (typeof result === 'string') {
-                res.name = result;
-            } else {
-                try {
-                    res.name = result.name;
-                    res.value = result.value;
-                } catch (err) {
-                    console.log(err);  // eslint-disable-line no-console
-                }
+        /** setup listeners */
+        this.on('actionEnd', (err, task) => {
+            if (err) this.handleError(err, task);
+            if (task.elements.every(el => el.done)) {
+                task.markDone();
+                this.emit('taskEnd', task);
             }
+        });
 
-            if (res.name) {
-                this.data = this.data || {};
-                this.data[res.name] = this.data[res.name] || [];
-                this.data[res.name].push(res.value);
+        this.on('taskEnd', () => {
+            if (this.tasks.every(t => t.done === true) ||
+                this.tasks.length === 0) {
+                this.done = true;
+                this.emit('done', this.report);
             }
         });
 
         return this;
     }
 
-    static changeTag(el, newTag) {
-        return changeTag(el, newTag);
+    addTask(task) {
+        if (task.constructor === Array) {
+            task.forEach(t => this.addTask(t));
+        }
+        this[Tasks].push(new Task(task, this.doc));
+        return this;
     }
 
-    static removeAttributes(el, ...attributes) {
-        return removeAttributes(el, ...attributes);
+    inflect() {
+        this.emit('start');
+        for (let i = 0; i < this.tasks.length; i += 1) {
+            this.runTask(this.tasks[i]);
+        }
+
+        return this;
     }
 
-    static removeContainer(el) {
-        return removeElement(el, true);
+    runTask(task) {
+        this.emit('taskStart', task);
+        try {
+            task.elements.forEach((el) => {
+                this.emit('actionStart', task);
+
+                if (!el.element) {
+                    el.markDone();
+                    this.emit('actionEnd', null, task);
+                    return;
+                }
+
+                const results = task.action.call(
+                    this, el.element, task.parameter
+                );
+
+                /** handle results */
+                if (results) {
+                    /** .then signals that a promise was returned */
+                    if (results.then) {
+                        results.then((result) => {
+                            const res = result || { name: task.action.name } || {};
+                            this.processResults(res, el.nodeLocation);
+                            el.markDone();
+                            this.emit('actionEnd', null, task);
+                        }).catch((err) => {
+                            el.markDone();
+                            this.emit('actionEnd', err, task);
+                        });
+                    /** function returned something other than a promise */
+                    } else {
+                        this.processResults(results, el.nodeLocation);
+                        el.markDone();
+                        this.emit('actionEnd', null, task);
+                    }
+                } else {
+                    el.markDone();
+                    this.emit('actionEnd', null, task);
+                }
+            });
+        } catch (err) {
+            this.handleError(err);
+        }
+
+        return this;
     }
 
-    static removeElement(el, keepChildren) {
-        return removeElement(el, keepChildren);
+    handleError(err, task) {
+        if (err.constructor === Array) {
+            err.forEach(e => this.handleError(e, task));
+            return this;
+        }
+        // this.emit('error', err, task);
+        this.errors.push(err);
+
+        return this;
     }
 
-    static removeParent(el) {
-        return removeElement(el.parentNode, true);
-    }
+    processResults(result, nodeLocation) {
+        let name;
+        let value = {};
+        if (typeof result === 'string') {
+            name = result;
+        } else {
+            try {
+                name = result.name;
+                value = result.value;
+                if (this.debug) {
+                    if (value.constructor !== Object) value = { val: value };
+                    value.nodeLocation = nodeLocation;
+                }
+            } catch (err) {
+                throw new Error(err);
+            }
+        }
 
-    static setEpubType(el, ...types) {
-        return setSemantics(el, 'epub:type', ...types);
-    }
+        if (name) {
+            this.count[name] = this.count[name] || 0;
+            this.count[name] += 1;
+            if (value) {
+                if (value.constructor === Array) {
+                    this.data[name] = value;
+                    return this;
+                }
+                this.data[name] = this.data[name] || [];
+                this.data[name].push(value);
+            }
+        }
 
-    static setRole(el, ...roles) {
-        return setSemantics(el, 'role', ...roles);
+        return this;
     }
 }
 
