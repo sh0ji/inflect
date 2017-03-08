@@ -15,12 +15,16 @@ const function1 = {
     selector: '#innertarget',
     action: (el) => {
         return new Promise((resolve, reject) => {
-            el.innerHTML = el.innerHTML.replace('Totam', 'Evan')
-            resolve({
-                name: 'evan',
-                value: 'Totam'
-            });
-        })
+            try {
+                el.innerHTML = el.innerHTML.replace('Totam', 'Evan')
+                resolve({
+                    name: 'evan',
+                    value: 'Totam'
+                });
+            } catch (err) {
+                reject(err);
+            }
+        });
     },
     expect: 'Evan',
     name: 'function1'
@@ -86,16 +90,12 @@ module.exports.function4 = function4;
 
 const function5 = {
     selector: 'li',
-    action: (el) => {
-        return new Promise((resolve) => {
-            resolve({
-                name: 'listItem',
-                value: el.outerHTML
-            });
-        });
-    },
+    action: el => Promise.resolve({
+        name: 'listItem',
+        value: el.outerHTML
+    }),
     expect: '<li>Lorem ipsum dolor sit amet, consectetuer adipiscing elit.</li>'
-}
+};
 module.exports.function5 = function5;
 
 const functionRemove = {

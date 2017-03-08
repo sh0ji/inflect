@@ -1,16 +1,14 @@
 /* eslint-disable */
-const fs = require('fs');
-const jsdom = require('jsdom');
 const Inflect = require('../index');
 const fileHtml = './spec/helpers/test.html';
+const tasks = require('./helpers/tasks.js');
+let task;
 
 describe('Inflect', function() {
     let inflect = null;
 
     beforeEach(function() {
-        let html = fs.readFileSync(fileHtml);
-        let doc = jsdom.jsdom(html);
-        inflect = new Inflect(doc);
+        inflect = new Inflect(fileHtml);
     });
 
     it('should create a new html-inflect instance', function() {
@@ -25,11 +23,11 @@ describe('Inflect', function() {
     });
 
     describe('task runner', function() {
-        let tasks = require('./helpers/tasks.js');
 
         it('should set the role on the target', function() {
             let task = tasks.setRole1;
-            inflect.runTask(task);
+            inflect.addTask(task);
+            inflect.inflect(task);
             let target = inflect.doc.querySelector(task.selector);
             expect(target.getAttribute('role')).toEqual(task.expect);
         });
@@ -37,8 +35,9 @@ describe('Inflect', function() {
         describe('changeTag action', function() {
             let task = tasks.changeTag1;
 
-            beforeEach(function(done) {
-                inflect.runTask(task).then(() => done());
+            beforeEach(function() {
+                inflect.addTask(task);
+                inflect.inflect(task);
             });
 
             it('should change the tagName of the target', function() {
@@ -50,8 +49,9 @@ describe('Inflect', function() {
         describe('use constructor this inside function action', function() {
             let task = tasks.functionRemove;
 
-            beforeEach(function(done) {
-                inflect.runTask(task).then(() => done());
+            beforeEach(function() {
+                inflect.addTask(task);
+                inflect.inflect(task);
             });
 
             it('should remove the blockquote', function() {
@@ -63,7 +63,8 @@ describe('Inflect', function() {
             let task = tasks.sync;
 
             beforeEach(function() {
-                inflect.runTask(task);
+                inflect.addTask(task);
+                inflect.inflect(task);
             });
 
             it('should have the `sync` class', function() {
@@ -72,43 +73,45 @@ describe('Inflect', function() {
             });
         });
 
-        describe('add to data object', function() {
-            let task = tasks.function5;
+        // describe('add to data object', function() {
+        //     let task = tasks.function5;
+        //
+        //     beforeEach(function() {
+        //         inflect.addTask(task);
+        //         inflect.inflect(task);
+        //     });
+        //
+        //     it('should should be the first li in the document', function() {
+        //         expect(inflect.data.listItem[0]).toEqual(task.expect);
+        //     });
+        //
+        //     it('should add all the li', function() {
+        //         expect(inflect.data.listItem.length).toEqual(5);
+        //     });
+        // });
 
-            beforeEach(function(done) {
-                inflect.runTask(task).then(() => done());
-            });
-
-            it('should should be the first li in the document', function() {
-                expect(inflect.data.listItem[0]).toEqual(task.expect);
-            });
-
-            it('should add all the li', function() {
-                expect(inflect.data.listItem.length).toEqual(5);
-            });
-        });
-
-        describe('run an array of tasks', function() {
-            let task = tasks.array;
-
-            beforeEach(function(done) {
-                inflect.runTasks(task).then(() => done());
-            });
-
-            it('should change content in steps', function() {
-                let target = inflect.doc.querySelector('#innertarget');
-                let pre = inflect.doc.querySelector('pre');
-                expect(/Evan is the best!/.test(target.textContent)).toEqual(true);
-                expect(Boolean(target.querySelector('.best'))).toEqual(true);
-                expect(pre.attributes.length).toEqual(0);
-            });
-
-            it('should iterate the counts', function() {
-                expect(inflect.data.changeTag.length).toEqual(1);
-                expect(inflect.data.evan.length).toEqual(2);
-                expect(inflect.data.removeAttributes.length).toEqual(1);
-                expect(inflect.data.setRole.length).toEqual(1);
-            })
-        });
+        // describe('run an array of tasks', function() {
+        //     let task = tasks.array;
+        //
+        //     beforeEach(function() {
+        //         inflect.addTask(task);
+        //         inflect.inflect(task);
+        //     });
+        //
+        //     it('should change content in steps', function() {
+        //         let target = inflect.doc.querySelector('#innertarget');
+        //         let pre = inflect.doc.querySelector('pre');
+        //         expect(/Evan is the best!/.test(target.textContent)).toEqual(true);
+        //         expect(Boolean(target.querySelector('.best'))).toEqual(true);
+        //         expect(pre.attributes.length).toEqual(0);
+        //     });
+        //
+        //     it('should iterate the counts', function() {
+        //         expect(inflect.data.changeTag.length).toEqual(1);
+        //         expect(inflect.data.evan.length).toEqual(2);
+        //         expect(inflect.data.removeAttributes.length).toEqual(1);
+        //         expect(inflect.data.setRole.length).toEqual(1);
+        //     })
+        // });
     });
 });
