@@ -35,11 +35,11 @@ class Inflect extends EventEmitter {
 
     get report() {
         const report = {
-            file: this.file,
+            file: this.basename,
             tasks: this.count
         };
         if (Object.keys(this.data).length) report.data = this.data;
-        if (this.errors.length) report.errors = this.errors;
+        if (Object.keys(this.errors).length) report.errors = this.errors;
         return report;
     }
 
@@ -73,7 +73,7 @@ class Inflect extends EventEmitter {
         this.done = false;
         this.count = {};
         this.data = {};
-        this.errors = [];
+        this.errors = {};
 
         /** add actions to this instance */
         Object.keys(actions).forEach((action) => {
@@ -82,7 +82,7 @@ class Inflect extends EventEmitter {
 
         /** setup action listener */
         this.on('actionEnd', (err, task) => {
-            if (err) this.handleError(err, task);
+            if (err) this.handleError(err, task.name);
             if (task.elements.every(el => el.done)) {
                 task.markDone();
                 this.emit('taskEnd', task);
@@ -142,9 +142,8 @@ class Inflect extends EventEmitter {
                 if (results) {
                     /** .then signals that a promise was returned */
                     if (results.then) {
-                        results.then((result) => {
-                            const res = result || { name: task.action.name } || {};
-                            this.processResults(res, el.nodeLocation);
+                        results.then((res) => {
+                            if (res) this.processResults(res, task.name, el.nodeLocation);
                             el.markDone();
                             this.emit('actionEnd', null, task);
                         }).catch((err) => {
@@ -153,7 +152,7 @@ class Inflect extends EventEmitter {
                         });
                     /** function returned something other than a promise */
                     } else {
-                        this.processResults(results, el.nodeLocation);
+                        this.processResults(results, task.name, el.nodeLocation);
                         el.markDone();
                         this.emit('actionEnd', null, task);
                     }
@@ -163,57 +162,46 @@ class Inflect extends EventEmitter {
                 }
             });
         } catch (err) {
-            this.handleError(err);
+            this.handleError(err, task.name);
         }
 
         return this;
     }
 
-    handleError(err, task) {
+    handleError(err, taskName) {
         if (err.constructor === Array) {
-            err.forEach(e => this.handleError(e, task));
+            err.forEach(e => this.handleError(e, taskName));
             return this;
         }
-        this.emit('error', err, task);
-        this.errors.push(err);
+        this.errors[taskName] = this.errors[taskName] || [];
+        this.errors[taskName].push(err.message);
+        this.emit('error', err.stack, taskName);
 
         return this;
     }
 
-    processResults(result, nodeLocation) {
-        let name;
-        let value = {};
-        if (typeof result === 'string') {
-            name = result;
-        } else {
-            try {
-                name = result.name;
-                value = result.value;
-                if (this.debug) {
-                    if (value) {
-                        if (value.constructor !== Object) value = { val: value };
-                        value.nodeLocation = nodeLocation;
-                    }
-                }
-            } catch (err) {
-                throw new Error(err);
-            }
+    processResults(result, taskName, nodeLocation) {
+        if (result.constructor === Array) {
+            result.forEach(r => this.processResults(r, taskName, nodeLocation));
+            return this;
         }
-
-        if (name) {
-            this.count[name] = this.count[name] || 0;
-            this.count[name] += 1;
-            if (value) {
-                if (value.constructor === Array) {
-                    this.data[name] = value;
-                    return this;
-                }
-                this.data[name] = this.data[name] || [];
-                this.data[name].push(value);
-            }
+        let res = result;
+        if (this.debug && nodeLocation) {
+            res = {
+                val: result,
+                loc: nodeLocation
+            };
         }
+        this.data[taskName] = this.data[taskName] || [];
+        this.data[taskName].push(res);
+        this.iterateCount(taskName);
 
         return this;
+    }
+
+    iterateCount(taskName) {
+        this.count[taskName] = this.count[taskName] || 0;
+        this.count[taskName] += 1;
     }
 }
 
