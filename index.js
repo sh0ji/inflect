@@ -38,7 +38,7 @@ class Inflect extends EventEmitter {
             file: this.file,
             tasks: this.count
         };
-        if (this.data.length) report.data = this.data;
+        if (Object.keys(this.data).length) report.data = this.data;
         if (this.errors.length) report.errors = this.errors;
         return report;
     }
@@ -174,7 +174,7 @@ class Inflect extends EventEmitter {
             err.forEach(e => this.handleError(e, task));
             return this;
         }
-        // this.emit('error', err, task);
+        this.emit('error', err, task);
         this.errors.push(err);
 
         return this;
@@ -190,8 +190,10 @@ class Inflect extends EventEmitter {
                 name = result.name;
                 value = result.value;
                 if (this.debug) {
-                    if (value.constructor !== Object) value = { val: value };
-                    value.nodeLocation = nodeLocation;
+                    if (value) {
+                        if (value.constructor !== Object) value = { val: value };
+                        value.nodeLocation = nodeLocation;
+                    }
                 }
             } catch (err) {
                 throw new Error(err);
