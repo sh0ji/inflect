@@ -2,8 +2,8 @@ const fs = require('fs');
 const path = require('path');
 const jsdom = require('jsdom');
 const Task = require('./lib/Task');
-const EventEmitter = require('events').EventEmitter;
 const actions = require('./lib/actions');
+const EventEmitter = require('events').EventEmitter;
 
 const jsdomConfig = {
     /**
