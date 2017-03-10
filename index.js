@@ -103,9 +103,7 @@ class Inflect extends EventEmitter {
         return new Promise((resolve, reject) => {
             try {
                 this.emit('start');
-                for (let i = 0; i < this.tasks.length; i += 1) {
-                    this.runTask(this.tasks[i]);
-                }
+                this.tasks.forEach(task => this.runTask(task));
 
                 this.on('taskEnd', () => {
                     if (this.tasks.every(t => t.done === true) ||
