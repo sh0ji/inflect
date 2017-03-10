@@ -70,7 +70,6 @@ class Inflect extends EventEmitter {
 
         this[Tasks] = [];
 
-        this.done = false;
         this.count = {};
         this.data = {};
         this.errors = {};
@@ -111,7 +110,6 @@ class Inflect extends EventEmitter {
                 this.on('taskEnd', () => {
                     if (this.tasks.every(t => t.done === true) ||
                         this.tasks.length === 0) {
-                        this.done = true;
                         this.emit('done', this.report);
                         resolve(this.report);
                     }
