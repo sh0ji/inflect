@@ -29,10 +29,6 @@ class Inflect extends EventEmitter {
         return path.basename(this.file);
     }
 
-    get total() {
-        return this.tasks.reduce((acc, task) => acc + task.elements.length, 0);
-    }
-
     get report() {
         const report = {
             file: this.basename,
@@ -114,15 +110,15 @@ class Inflect extends EventEmitter {
     }
 
     runTask(task) {
-        this.emit('taskStart', task);
-        try {
-            task.elements.forEach((el) => {
-                this.emit('actionStart', task);
+        task.loadElements(this.doc);
+        this.emit('elementsLoaded', task.elements.length);
+        task.elements.forEach((el) => {
+            this.emit('actionStart', task);
 
-                if (!el.element) {
-                    this.emit('actionEnd', null, task, el);
-                    return;
-                }
+            if (!el.element) {
+                this.emit('actionEnd', null, task, el);
+                return;
+            }
 
             const results = task.action.call(
                 this, el.element, task.parameter
