@@ -80,9 +80,11 @@ class Inflect extends EventEmitter {
         });
 
         /** setup action listener */
-        this.on('actionEnd', (err, task) => {
+        this.on('actionEnd', (err, task, el) => {
             if (err) this.handleError(err, task.name);
-            if (task.elements.every(el => el.done)) {
+            el.markDone();
+            this.iterateCount(task.name);
+            if (task.elements.every(e => e.done)) {
                 task.markDone();
                 this.emit('taskEnd', task);
             }
@@ -125,8 +127,7 @@ class Inflect extends EventEmitter {
                 this.emit('actionStart', task);
 
                 if (!el.element) {
-                    el.markDone();
-                    this.emit('actionEnd', null, task);
+                    this.emit('actionEnd', null, task, el);
                     return;
                 }
 
@@ -139,22 +140,20 @@ class Inflect extends EventEmitter {
                     /** .then signals that a promise was returned */
                     if (results.then) {
                         results.then((res) => {
-                            if (res) this.processResults(res, task.name, el.nodeLocation);
-                            el.markDone();
-                            this.emit('actionEnd', null, task);
+                            if (res) {
+                                this.processResults(res, task.name, el.nodeLocation);
+                            }
+                            this.emit('actionEnd', null, task, el);
                         }).catch((err) => {
-                            el.markDone();
-                            this.emit('actionEnd', err, task);
+                            this.emit('actionEnd', err, task, el);
                         });
                     /** function returned something other than a promise */
                     } else {
                         this.processResults(results, task.name, el.nodeLocation);
-                        el.markDone();
-                        this.emit('actionEnd', null, task);
+                        this.emit('actionEnd', null, task, el);
                     }
                 } else {
-                    el.markDone();
-                    this.emit('actionEnd', null, task);
+                    this.emit('actionEnd', null, task, el);
                 }
             });
         } catch (err) {
@@ -190,7 +189,6 @@ class Inflect extends EventEmitter {
         }
         this.data[taskName] = this.data[taskName] || [];
         this.data[taskName].push(res);
-        this.iterateCount(taskName);
 
         return this;
     }
