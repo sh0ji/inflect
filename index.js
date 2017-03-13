@@ -80,8 +80,8 @@ class Inflect extends EventEmitter {
         });
 
         /** setup action listener */
-        this.on('actionEnd', (err, task, el) => {
-            if (err) this.handleError(err, task.name);
+        this.on('actionEnd', (res, task, el) => {
+            this.processResults(res, task, el);
             el.markDone();
             this.iterateCount(task.name);
             if (task.elements.every(e => e.done)) {
@@ -96,28 +96,14 @@ class Inflect extends EventEmitter {
     addTask(task) {
         if (task.constructor === Array) {
             task.forEach(t => this.addTask(t));
+            return this;
         }
         this[Tasks].push(new Task(task, this.doc));
         return this;
     }
 
     inflect() {
-        return new Promise((resolve, reject) => {
-            try {
-                this.emit('start');
-                this.tasks.forEach(task => this.runTask(task));
-
-                this.on('taskEnd', () => {
-                    if (this.tasks.every(t => t.done === true) ||
-                        this.tasks.length === 0) {
-                        this.emit('done', this.report);
-                        resolve(this.report);
-                    }
-                });
-            } catch (err) {
-                reject(err);
-            }
-        });
+        this.tasks.forEach(task => this.runTask(task));
     }
 
     runTask(task) {
@@ -131,34 +117,20 @@ class Inflect extends EventEmitter {
                     return;
                 }
 
-                const results = task.action.call(
-                    this, el.element, task.parameter
-                );
+            const results = task.action.call(
+                this, el.element, task.parameter
+            );
 
-                /** handle results */
-                if (results) {
-                    /** .then signals that a promise was returned */
-                    if (results.then) {
-                        results.then((res) => {
-                            if (res) {
-                                this.processResults(res, task.name, el.nodeLocation);
-                            }
-                            this.emit('actionEnd', null, task, el);
-                        }).catch((err) => {
-                            this.emit('actionEnd', err, task, el);
-                        });
-                    /** function returned something other than a promise */
-                    } else {
-                        this.processResults(results, task.name, el.nodeLocation);
-                        this.emit('actionEnd', null, task, el);
-                    }
-                } else {
-                    this.emit('actionEnd', null, task, el);
-                }
-            });
-        } catch (err) {
-            this.handleError(err, task.name);
-        }
+            /** handle results */
+            /** .then signals that a promise was returned */
+            if (results && results.then) {
+                results
+                    .then(res => this.emit('actionEnd', res, task, el))
+                    .catch(err => this.emit('actionEnd', err, task, el));
+            } else {
+                this.emit('actionEnd', results, task, el);
+            }
+        });
 
         return this;
     }
@@ -175,20 +147,24 @@ class Inflect extends EventEmitter {
         return this;
     }
 
-    processResults(result, taskName, nodeLocation) {
-        if (result.constructor === Array) {
-            result.forEach(r => this.processResults(r, taskName, nodeLocation));
-            return this;
+    processResults(result, task, el) {
+        if (result) {
+            if (result.constructor === Array) {
+                result.forEach(r => this.processResults(r, task, el));
+            } else if (result instanceof Error) {
+                this.handleError(result, task.name);
+            } else {
+                let res = result;
+                if (this.debug && el.nodeLocation) {
+                    res = {
+                        val: result,
+                        loc: el.nodeLocation
+                    };
+                }
+                this.data[task.name] = this.data[task.name] || [];
+                this.data[task.name].push(res);
+            }
         }
-        let res = result;
-        if (this.debug && nodeLocation) {
-            res = {
-                val: result,
-                loc: nodeLocation
-            };
-        }
-        this.data[taskName] = this.data[taskName] || [];
-        this.data[taskName].push(res);
 
         return this;
     }
