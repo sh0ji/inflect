@@ -90,6 +90,13 @@ class Inflect extends EventEmitter {
             }
         });
 
+        this.on('taskEnd', () => {
+            if (this.tasks.every(t => t.done === true) ||
+                this.tasks.length === 0) {
+                this.emit('done', this.report);
+            }
+        });
+
         return this;
     }
 
