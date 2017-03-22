@@ -29,16 +29,6 @@ class Inflect extends EventEmitter {
         return path.basename(this.file);
     }
 
-    get report() {
-        const report = {
-            file: this.basename,
-            tasks: this.count
-        };
-        if (Object.keys(this.data).length) report.data = this.data;
-        if (Object.keys(this.errors).length) report.errors = this.errors;
-        return report;
-    }
-
     get tasks() {
         return this[Tasks];
     }
@@ -66,7 +56,7 @@ class Inflect extends EventEmitter {
 
         this[Tasks] = [];
 
-        this.count = {};
+        this.taskCount = {};
         this.data = {};
         this.errors = {};
 
@@ -89,7 +79,7 @@ class Inflect extends EventEmitter {
         this.on('taskEnd', () => {
             if (this.tasks.every(t => t.done === true) ||
                 this.tasks.length === 0) {
-                this.emit('done', this.report);
+                this.emit('done');
             }
         });
 
@@ -173,8 +163,8 @@ class Inflect extends EventEmitter {
     }
 
     iterateCount(taskName) {
-        this.count[taskName] = this.count[taskName] || 0;
-        this.count[taskName] += 1;
+        this.taskCount[taskName] = this.taskCount[taskName] || 0;
+        this.taskCount[taskName] += 1;
     }
 }
 
