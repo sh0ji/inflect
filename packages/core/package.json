@@ -1,0 +1,22 @@
+{
+  "name": "@inflect/core",
+  "version": "2.1.0",
+  "description": "Cleanup, modify, and save messy HTML",
+  "main": "index.js",
+  "scripts": {
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wwnorton/inflect.git"
+  },
+  "author": "Evan Yamanishi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/wwnorton/inflect/issues"
+  },
+  "homepage": "https://github.com/wwnorton/inflect#readme",
+  "dependencies": {
+    "jsdom": "^9.11.0",
+    "lodash": "^4.17.4"
+  }
+}

@@ -1,36 +1,14 @@
 {
-  "name": "html-inflect",
-  "version": "2.1.0",
-  "description": "Cleanup, modify, and save messy HTML",
-  "main": "index.js",
-  "scripts": {
-    "clean-deps": "rimraf node_modules",
-    "test": "node ./node_modules/jasmine/bin/jasmine.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/sh0ji/inflect.git"
-  },
-  "author": "Evan Yamanishi",
-  "license": "GPL-3.0",
-  "bugs": {
-    "url": "https://github.com/sh0ji/inflect/issues"
-  },
-  "homepage": "https://github.com/sh0ji/inflect#readme",
-  "devDependencies": {
-    "babel-preset-es2015": "^6.22.0",
-    "babelify": "^7.3.0",
-    "browserify": "^14.0.0",
-    "eslint": "^3.16.1",
-    "eslint-config-airbnb": "^14.1.0",
-    "eslint-plugin-import": "^2.2.0",
-    "eslint-plugin-jsx-a11y": "^4.0.0",
-    "eslint-plugin-react": "^6.10.0",
-    "jasmine": "^2.5.3",
-    "uglifyify": "^3.0.4"
-  },
-  "dependencies": {
-    "jsdom": "^9.11.0",
-    "lodash": "^4.17.4"
-  }
+	"name": "inflect",
+	"private": true,
+	"author": "Evan Yamanishi",
+	"workspaces": [
+		"packages/*"
+	],
+	"scripts": {},
+	"devDependencies": {
+		"eslint": "^7.2.0",
+		"eslint-config-norton": "^3.1.3",
+		"eslint-plugin-import": "^2.22.0"
+	}
 }
