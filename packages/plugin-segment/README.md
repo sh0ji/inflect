@@ -12,8 +12,8 @@ Simply add `segment.browser.js` as a script in the page you want to segment.
 
 ```html
 <body>
-    ...page contents...
-    <script src="segment.browser.js" type="text/javascript"></script>
+	...page contents...
+	<script src="segment.browser.js" type="text/javascript"></script>
 </body>
 ```
 
@@ -21,7 +21,7 @@ The browser version attaches the segment class to the window object as `htmlSegm
 
 ```javascript
 // e.g. main.js
-let segment = new htmlSegment(document)
+let segment = new htmlSegment(document);
 ```
 
 By default, this will automatically wrap all headings and their contents in `<section>` containers.
@@ -38,16 +38,15 @@ Include it in your module:
 
 ```javascript
 // ES6
-import segment from 'html-segment'
+import segment from "html-segment";
 
 // ES5
-var segment = require('html-segment')
+var segment = require("html-segment");
 ```
 
 This will import the `dist/segment.module.js` version.
 
 ## Options
-
 
 ## Preprocessing
 
@@ -59,38 +58,41 @@ This example creates a document object using [jsdom](https://github.com/tmpvar/j
 
 ```javascript
 // ES6 & Node.js
-import fs from 'fs'
-import path from 'path'
-import jsdom from 'jsdom'
+import fs from "fs";
+import path from "path";
+import jsdom from "jsdom";
 
 // equivalent to `const htmlSegment = require('html-segment')`
-import htmlSegment from 'html-segment'
+import htmlSegment from "html-segment";
 
 const dirs = {
-    input: './documents/input',
-    output: './documents/output'
-}
+	input: "./documents/input",
+	output: "./documents/output",
+};
 
-const filename = 'myFile.html'
+const filename = "myFile.html";
 
 // read the file
-fs.readFile(path.join(dirs.input, filename), 'utf8', (err, data) => {
+fs.readFile(path.join(dirs.input, filename), "utf8", (err, data) => {
+	// pass to jsdom
+	jsdom.env(data, (jsdomErr, window) => {
+		if (jsdomErr) throw jsdomErr;
 
-    // pass to jsdom
-    jsdom.env(data, (jsdomErr, window) => {
-        if (jsdomErr) throw jsdomErr
+		// run segment
+		let segment = new htmlSegment(window.document);
 
-        // run segment
-        let segment = new htmlSegment(window.document)
+		// an example of something you can do with the segment object
+		// this will output all of the section ids that segment creates
+		segment.sections.map((section) => console.log(section.getAttribute("id")));
 
-        // an example of something you can do with the segment object
-        // this will output all of the section ids that segment creates
-        segment.sections.map((section) => console.log(section.getAttribute('id')))
-
-        // write the result to a new output file
-        fs.writeFile(path.join(dirs.output, filename), window.document.documentElement.outerHTML, (writeErr) => {
-            if (writeErr) throw writeErr
-        })
-    })
-})
+		// write the result to a new output file
+		fs.writeFile(
+			path.join(dirs.output, filename),
+			window.document.documentElement.outerHTML,
+			(writeErr) => {
+				if (writeErr) throw writeErr;
+			}
+		);
+	});
+});
 ```
