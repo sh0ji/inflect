@@ -1,23 +1,24 @@
 {
-  "name": "@inflect/plugin-segment",
-  "version": "1.1.0",
-  "description": "Wrap headings and their contents in semantic section containers",
-  "main": "dist/segment.module.js",
-  "scripts": {
-    "clean": "del-cli dist/*",
-    "build-browser": "browserify src/segment.js -s html-segment -t [ babelify --presets [ es2015 ] --plugins [ add-module-exports ] ] | derequire > dist/segment.browser.js",
-    "build-node": "babel src/segment.js -o dist/segment.module.js",
-    "prepublish": "npm run build-browser & npm run build-node"
-  },
-  "repository": {
-    "type": "git",
+	"name": "@inflect/plugin-segment",
+	"version": "1.1.0",
+	"description": "Wrap headings and their contents in semantic section containers",
+	"homepage": "https://github.com/wwnorton/inflect#readme",
+	"bugs": {
+		"url": "https://github.com/wwnorton/inflect/issues"
+	},
+	"repository": {
+		"type": "git",
 		"url": "git+https://github.com/wwnorton/inflect.git",
 		"directory": "packages/plugin-segment"
-  },
-  "author": "Evan Yamanishi",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/wwnorton/inflect/issues"
-  },
-  "homepage": "https://github.com/wwnorton/inflect#readme"
+	},
+	"license": "MIT",
+	"author": "Evan Yamanishi",
+	"main": "dist/index.js",
+	"umd:main": "dist/index.umd.js",
+	"module": "dist/index.m.js",
+	"source": "src/index.ts",
+	"types": "dist/dist.d.ts",
+	"scripts": {
+		"build": "microbundle --format cjs"
+	}
 }

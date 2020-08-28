@@ -1,23 +1,27 @@
 {
-  "name": "@inflect/core",
-  "version": "2.1.0",
-  "description": "Cleanup, modify, and save messy HTML",
-  "main": "src/index.js",
-  "scripts": {
-  },
-  "repository": {
-    "type": "git",
+	"name": "@inflect/core",
+	"version": "2.1.0",
+	"description": "Cleanup, modify, and save messy HTML",
+	"homepage": "https://github.com/wwnorton/inflect#readme",
+	"bugs": {
+		"url": "https://github.com/wwnorton/inflect/issues"
+	},
+	"repository": {
+		"type": "git",
 		"url": "git+https://github.com/wwnorton/inflect.git",
 		"directory": "packages/core"
-  },
-  "author": "Evan Yamanishi",
-  "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/wwnorton/inflect/issues"
-  },
-  "homepage": "https://github.com/wwnorton/inflect#readme",
-  "dependencies": {
-    "jsdom": "^9.11.0",
-    "lodash": "^4.17.4"
-  }
+	},
+	"license": "MIT",
+	"author": "Evan Yamanishi",
+	"main": "dist/index.js",
+	"module": "dist/index.m.js",
+	"source": "src/index.ts",
+	"types": "dist/dist.d.ts",
+	"scripts": {
+		"build": "microbundle --format cjs"
+	},
+	"dependencies": {
+		"jsdom": "^9.11.0",
+		"lodash": "^4.17.4"
+	}
 }
