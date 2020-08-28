@@ -7,7 +7,8 @@
 	],
 	"scripts": {
 		"build": "lerna exec npm run build",
-		"lint": "eslint . --ignore-path .gitignore"
+		"lint": "eslint . --ignore-path .gitignore",
+		"prettier": "prettier '**/!(package-lock)*.{html,xhtml,md,json,yaml,yml}' --ignore-path .gitignore --write"
 	},
 	"husky": {
 		"hooks": {
