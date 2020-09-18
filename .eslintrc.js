@@ -1,6 +1,18 @@
 module.exports = {
 	root: true,
 	extends: ['norton'],
+	rules: {
+		'import/extensions': [
+			'error',
+			'ignorePackages',
+			{
+				js: 'never',
+				jsx: 'never',
+				ts: 'never',
+				tsx: 'never',
+			},
+		],
+	},
 	overrides: [
 		{
 			files: ['*.ts'],
@@ -13,6 +25,8 @@ module.exports = {
 				indent: 'off',
 				'no-tabs': 'off',
 				'@typescript-eslint/indent': ['error', 'tab'],
+				'import/no-cycle': [2, { maxDepth: 1 }],
+				'no-void': 'off',
 			},
 			parserOptions: {
 				project: './tsconfig.json',
