@@ -4,13 +4,13 @@ import { JSDOM } from 'jsdom';
 
 export type ActionNames =
 	| 'changeTag'
-	// | 'changeTagAsync'
+	| 'changeTagAsync'
 	| 'removeAttributes'
-	// | 'removeAttributesAsync'
+	| 'removeAttributesAsync'
 	| 'removeElement'
-	// | 'removeElementAsync'
+	| 'removeElementAsync'
 	| 'setSemantics'
-	// | 'setSemanticsAsync'
+	| 'setSemanticsAsync'
 	| 'removeContainer'
 	| 'removeParent'
 	| 'setEpubType'
@@ -38,16 +38,16 @@ export default class Actions {
 		}
 	}
 
-	// changeTagAsync(el: Element, tag: string): Promise<void> {
-	// 	return new Promise((resolve, reject) => {
-	// 		try {
-	// 			this.changeTag(el, tag);
-	// 			resolve();
-	// 		} catch (err) {
-	// 			reject(err);
-	// 		}
-	// 	});
-	// }
+	changeTagAsync(el: Element, tag: string): Promise<void> {
+		return new Promise((resolve, reject) => {
+			try {
+				this.changeTag(el, tag);
+				resolve();
+			} catch (err) {
+				reject(err);
+			}
+		});
+	}
 
 	removeAttributes(el: Element, ...attributes: string[]): void {
 		let attrs = flattenDeep(attributes.map((attr) => attr.split(/,\s*/)));
@@ -57,16 +57,16 @@ export default class Actions {
 		attrs.forEach((attr) => el.removeAttribute(attr));
 	}
 
-	// removeAttributesAsync(el: Element, ...attributes: string[]): Promise<void> {
-	// 	return new Promise((resolve, reject) => {
-	// 		try {
-	// 			this.removeAttributes(el, ...attributes);
-	// 			resolve();
-	// 		} catch (err) {
-	// 			reject(err);
-	// 		}
-	// 	});
-	// }
+	removeAttributesAsync(el: Element, ...attributes: string[]): Promise<void> {
+		return new Promise((resolve, reject) => {
+			try {
+				this.removeAttributes(el, ...attributes);
+				resolve();
+			} catch (err) {
+				reject(err);
+			}
+		});
+	}
 
 	removeElement(el: Element | null, keepChildren: string): void {
 		if (el) {
@@ -79,16 +79,16 @@ export default class Actions {
 		}
 	}
 
-	// removeElementAsync(el: Element | null, keepChildren: string): Promise<void> {
-	// 	return new Promise((resolve, reject) => {
-	// 		try {
-	// 			this.removeElement(el, keepChildren);
-	// 			resolve();
-	// 		} catch (err) {
-	// 			reject(err);
-	// 		}
-	// 	});
-	// }
+	removeElementAsync(el: Element | null, keepChildren: string): Promise<void> {
+		return new Promise((resolve, reject) => {
+			try {
+				this.removeElement(el, keepChildren);
+				resolve();
+			} catch (err) {
+				reject(err);
+			}
+		});
+	}
 
 	setSemantics(el: Element, attr: string, ...values: string[]): void {
 		const vals = flattenDeep(values.map((val) => {
@@ -100,25 +100,25 @@ export default class Actions {
 		el.setAttribute(attr, vals);
 	}
 
-	// setSemanticsAsync(el: Element, attr: string, ...values: string[]): Promise<void> {
-	// 	return new Promise((resolve, reject) => {
-	// 		try {
-	// 			this.setSemantics(el, attr, ...values);
-	// 			resolve();
-	// 		} catch (err) {
-	// 			reject(err);
-	// 		}
-	// 	});
-	// }
+	setSemanticsAsync(el: Element, attr: string, ...values: string[]): Promise<void> {
+		return new Promise((resolve, reject) => {
+			try {
+				this.setSemantics(el, attr, ...values);
+				resolve();
+			} catch (err) {
+				reject(err);
+			}
+		});
+	}
 
 	/** aliases for special actions */
 	removeContainer(el: Element): void {
 		this.removeElement(el, 'true');
 	}
 
-	// removeContainerAsync(el: Element): Promise<void> {
-	// 	return this.removeElementAsync(el, 'true');
-	// }
+	removeContainerAsync(el: Element): Promise<void> {
+		return this.removeElementAsync(el, 'true');
+	}
 
 	removeParent(el: Element): void {
 		if (el.parentNode) {
@@ -127,21 +127,21 @@ export default class Actions {
 		}
 	}
 
-	// removeParentAsync(el: Element): Promise<void> {
-	// 	if (el.parentNode) {
-	// 		const { parentNode } = el;
-	// 		return this.removeElementAsync(parentNode as Element, 'true');
-	// 	}
-	// 	return Promise.resolve();
-	// }
+	removeParentAsync(el: Element): Promise<void> {
+		if (el.parentNode) {
+			const { parentNode } = el;
+			return this.removeElementAsync(parentNode as Element, 'true');
+		}
+		return Promise.resolve();
+	}
 
 	setEpubType(el: Element, ...types: string[]): void {
 		this.setSemantics(el, 'epub:type', ...types);
 	}
 
-	// setEpubTypeAsync(el: Element, ...types: string[]): Promise<void> {
-	// 	return this.setSemanticsAsync(el, 'epub:type', ...types);
-	// }
+	setEpubTypeAsync(el: Element, ...types: string[]): Promise<void> {
+		return this.setSemanticsAsync(el, 'epub:type', ...types);
+	}
 
 	setRole(el: Element, ...roles: string[]): void {
 		this.setSemantics(el, 'role', ...roles);

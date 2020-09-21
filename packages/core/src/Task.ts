@@ -35,7 +35,7 @@ class Task {
      * Turn string actions into one of the preset actions
      * @return {Function}
      */
-	get action(): Actions[ActionNames] | ((el: Element) => void | Element) {
+	get action(): Actions[ActionNames] | ((el: Element) => void | Element | Promise<void>) {
 		if (typeof this.taskObj.action === 'string') {
 			if (this.taskObj.action in this.defaultActions) {
 				return this.defaultActions[this.taskObj.action];

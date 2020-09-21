@@ -80,11 +80,15 @@ export default class Inflect extends EventEmitter {
 		task.elements.forEach((el) => {
 			this.emit('actionStart', task);
 
-			// need to handle async results here--lots of typescript issues
 			if (!el.element) {
 				this.emit('actionEnd', null, task, el);
 			} else {
 				const results = task.action(el.element, task.parameter as string);
+				if (results && (results as Promise<void>).then) {
+					(results as Promise<void>)
+						.then((res) => this.emit('actionEnd', res, task, el))
+						.catch((err) => this.emit('actionEnd', err, task, el));
+				}
 				this.emit('actionEnd', results, task, el);
 			}
 		});
