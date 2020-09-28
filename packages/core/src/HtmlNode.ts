@@ -6,14 +6,10 @@ export interface NodeLocation {
 }
 
 class HtmlNode {
-	public element?: Element;
+	public done = false;
 
-	public done: boolean;
-
-	private doc: JSDOM;
-
-	constructor(el: Element | null, doc: JSDOM) {
-		if (el) this.element = el;
+	constructor(public element: Element | null, public doc: JSDOM) {
+		if (element) this.element = element;
 		this.doc = doc;
 		this.done = false;
 	}

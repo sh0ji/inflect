@@ -9,44 +9,43 @@ export interface TaskInterface {
 }
 
 class Task {
-	private taskObj: TaskInterface;
+	#taskObj: TaskInterface;
 
-	private dom: JSDOM;
+	#dom: JSDOM;
 
-	private defaultActions: Actions;
+	#defaultActions: Actions;
 
 	public elements: HtmlNode[];
 
-	public done: boolean;
+	public isDone = false;
 
 	constructor(taskObj: TaskInterface, dom: JSDOM) {
-		this.taskObj = taskObj;
+		this.#taskObj = taskObj;
 		this.elements = [];
-		this.done = false;
-		this.dom = dom;
-		this.defaultActions = new Actions(dom);
+		this.#dom = dom;
+		this.#defaultActions = new Actions(dom);
 	}
 
 	get selector(): string {
-		return this.taskObj.selector;
+		return this.#taskObj.selector;
 	}
 
 	/**
-     * Turn string actions into one of the preset actions
-     * @return {Function}
-     */
+	* Turn string actions into one of the preset actions
+	* @return {Function}
+	*/
 	get action(): Actions[ActionNames] | ((el: Element) => void | Element | Promise<void>) {
-		if (typeof this.taskObj.action === 'string') {
-			if (this.taskObj.action in this.defaultActions) {
-				return this.defaultActions[this.taskObj.action];
+		if (typeof this.#taskObj.action === 'string') {
+			if (this.#taskObj.action in this.#defaultActions) {
+				return this.#defaultActions[this.#taskObj.action];
 			}
-			throw new Error(`${this.taskObj.action} is not a valid action.`);
+			throw new Error(`${this.#taskObj.action} is not a valid action.`);
 		}
-		return this.taskObj.action;
+		return this.#taskObj.action;
 	}
 
 	get parameter(): string | undefined {
-		return this.taskObj.parameter;
+		return this.#taskObj.parameter;
 	}
 
 	get name(): string {
@@ -57,16 +56,16 @@ class Task {
 	}
 
 	loadElements(): Task {
-		const { document } = this.dom.window;
+		const { document } = this.#dom.window;
 		const els = Array.from(document.querySelectorAll(this.selector));
 		this.elements = (els.length > 0)
-			? els.map((el) => new HtmlNode(el, this.dom))
-			: [new HtmlNode(null, this.dom)];
+			? els.map((el) => new HtmlNode(el, this.#dom))
+			: [new HtmlNode(null, this.#dom)];
 		return this;
 	}
 
-	markDone(): void {
-		this.done = true;
+	done(): void {
+		this.isDone = true;
 	}
 }
 
