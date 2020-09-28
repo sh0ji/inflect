@@ -17,10 +17,10 @@ export type ActionNames =
 	| 'setRole';
 
 export default class Actions {
-	private dom: JSDOM;
+	#dom: JSDOM;
 
 	constructor(dom: JSDOM) {
-		this.dom = dom;
+		this.#dom = dom;
 	}
 
 	changeTag(el: Element, tag: string): void {
@@ -29,7 +29,7 @@ export default class Actions {
 
 		if (newTag && currentTag !== newTag) {
 			const parent = el.parentNode;
-			const newEl = this.dom.window.document.createElement(newTag);
+			const newEl = this.#dom.window.document.createElement(newTag);
 			Array.from(el.attributes).forEach((attr) => {
 				newEl.setAttribute(attr.name, attr.value);
 			});
