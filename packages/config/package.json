@@ -1,0 +1,24 @@
+{
+	"name": "@inflect/config",
+	"version": "1.0.0",
+	"description": "Configuration for @inflect/core.",
+	"author": "Gabriel Rumbaut <grumbaut@wwnorton.com>",
+	"homepage": "https://github.com/wwnorton/inflect#readme",
+	"bugs": {
+		"url": "https://github.com/wwnorton/inflect/issues"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/wwnorton/inflect.git",
+		"directory": "packages/config"
+	},
+	"license": "MIT",
+	"main": "lib/config.js",
+	"scripts": {
+		"build": "microbundle --format cjs"
+	},
+	"dependencies": {
+		"import-global": "^0.1.0",
+		"is-installed-globally": "^0.3.2"
+	}
+}
