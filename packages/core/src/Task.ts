@@ -1,50 +1,36 @@
-import { JSDOM } from 'jsdom';
 import HtmlNode from './HtmlNode';
-import Actions, { ActionNames } from './Actions';
+
+export type Action<D = Document, T = Element, O = Record<string, unknown>> =
+	(dom: D, node: T, opts?: O) => void | Promise<void> | T | Promise<T>;
 
 export interface TaskInterface {
-	action: ActionNames | ((el: Element) => void | Element);
+	action: Action;
 	selector: string;
-	parameter?: string;
+	parameter?: Record<string, unknown>;
 }
 
 class Task {
 	#taskObj: TaskInterface;
 
-	#dom: JSDOM;
-
-	#defaultActions: Actions;
-
 	public elements: HtmlNode[];
 
 	public isDone = false;
 
-	constructor(taskObj: TaskInterface, dom: JSDOM) {
+	constructor(taskObj: TaskInterface, public dom: Document) {
 		this.#taskObj = taskObj;
 		this.elements = [];
-		this.#dom = dom;
-		this.#defaultActions = new Actions(dom);
+		this.dom = dom;
 	}
 
 	get selector(): string {
 		return this.#taskObj.selector;
 	}
 
-	/**
-	* Turn string actions into one of the preset actions
-	* @return {Function}
-	*/
-	get action(): Actions[ActionNames] | ((el: Element) => void | Element | Promise<void>) {
-		if (typeof this.#taskObj.action === 'string') {
-			if (this.#taskObj.action in this.#defaultActions) {
-				return this.#defaultActions[this.#taskObj.action];
-			}
-			throw new Error(`${this.#taskObj.action} is not a valid action.`);
-		}
+	get action(): Action {
 		return this.#taskObj.action;
 	}
 
-	get parameter(): string | undefined {
+	get parameter(): Record<string, unknown> | undefined {
 		return this.#taskObj.parameter;
 	}
 
@@ -56,11 +42,10 @@ class Task {
 	}
 
 	loadElements(): Task {
-		const { document } = this.#dom.window;
-		const els = Array.from(document.querySelectorAll(this.selector));
+		const els = Array.from(this.dom.querySelectorAll(this.selector));
 		this.elements = (els.length > 0)
-			? els.map((el) => new HtmlNode(el, this.#dom))
-			: [new HtmlNode(null, this.#dom)];
+			? els.map((el) => new HtmlNode(el))
+			: [new HtmlNode(null)];
 		return this;
 	}
 

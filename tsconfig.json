@@ -15,7 +15,6 @@
 		"outDir": "dist",
 		"removeComments": false,
 		"resolveJsonModule": true,
-		"rootDir": ".",
 		"skipLibCheck": false,
 		"sourceMap": true,
 		"strict": true,
