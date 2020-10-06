@@ -17,6 +17,9 @@
 	"module": "dist/index.m.js",
 	"source": "src/index.ts",
 	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"build": "microbundle --format cjs --target node"
 	},
