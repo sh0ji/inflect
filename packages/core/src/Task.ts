@@ -1,7 +1,10 @@
 import HtmlNode from './HtmlNode';
 
 export type Action<D = Document, T = Element, O = Record<string, unknown>> =
-	(dom: D, node: T, opts?: O) => void | Promise<void> | T | Promise<T>;
+	(dom: D, node: T, opts?: O) => void | T;
+
+export type AsyncAction<D = Document, T = Element, O = Record<string, unknown>> =
+	(dom: D, node: T, opts?: O) => Promise<void> | Promise<T>;
 
 export interface TaskInterface {
 	action: Action;
