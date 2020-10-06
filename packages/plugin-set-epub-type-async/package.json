@@ -1,0 +1,35 @@
+{
+	"name": "@inflect/plugin-set-epub-type-async",
+	"version": "1.0.0",
+	"description": "Async plugin to set epub type.",
+	"keywords": [
+		"Inflect",
+		"plugin",
+		"HTML"
+	],
+	"author": "Gabriel Rumbaut <grumbaut@wwnorton.com>",
+	"homepage": "https://github.com/wwnorton/inflect#readme",
+	"license": "MIT",
+	"main": "dist/index.js",
+	"module": "dist/index.m.js",
+	"source": "src/index.ts",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/wwnorton/inflect.git",
+		"directory": "packages/plugin-set-epub-type-async"
+	},
+	"scripts": {
+		"build": "microbundle --format cjs"
+	},
+	"bugs": {
+		"url": "https://github.com/wwnorton/inflect/issues"
+	},
+	"dependencies": {
+		"@inflect/core": "^2.1.0",
+		"@inflect/plugin-set-semantics-async": "^1.0.0"
+	}
+}
