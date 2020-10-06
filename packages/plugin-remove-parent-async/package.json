@@ -1,0 +1,35 @@
+{
+	"name": "@inflect/plugin-remove-parent-async",
+	"version": "1.0.0",
+	"description": "Async Inflect plugin to remove a parent element.",
+	"keywords": [
+		"Inflect",
+		"plugin",
+		"HTML"
+	],
+	"author": "Gabriel Rumbaut",
+	"homepage": "https://github.com/wwnorton/inflect#readme",
+	"license": "MIT",
+	"main": "dist/index.js",
+	"module": "dist/index.m.js",
+	"source": "src/index.ts",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/wwnorton/inflect.git",
+		"directory": "packages/plugin-remove-parent-async"
+	},
+	"scripts": {
+		"build": "microbundle --format cjs"
+	},
+	"bugs": {
+		"url": "https://github.com/wwnorton/inflect/issues"
+	},
+	"dependencies": {
+		"@inflect/core": "^2.1.0",
+		"@inflect/plugin-remove-element-async": "^1.0.0"
+	}
+}
