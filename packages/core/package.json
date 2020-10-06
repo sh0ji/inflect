@@ -16,9 +16,9 @@
 	"main": "dist/index.js",
 	"module": "dist/index.m.js",
 	"source": "src/index.ts",
-	"types": "dist/dist.d.ts",
+	"types": "dist/index.d.ts",
 	"scripts": {
-		"build": "microbundle --format cjs"
+		"build": "microbundle --format cjs --target node"
 	},
 	"dependencies": {
 		"is-glob": "^4.0.1",
