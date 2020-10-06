@@ -1,6 +1,6 @@
 import { EventEmitter } from 'events';
 import HTMLNode from './HtmlNode';
-import Task, { TaskInterface, Action } from './Task';
+import Task, { TaskInterface } from './Task';
 
 export default class Inflect extends EventEmitter {
 	public data: Record<string, (Element|undefined)[]> = {};
@@ -108,4 +108,4 @@ export default class Inflect extends EventEmitter {
 	}
 }
 
-export type { Action };
+export { Action, AsyncAction } from './Task';
