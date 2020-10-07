@@ -1,7 +1,8 @@
 import { Action } from '@inflect/core';
-import setSemantics, { SetSemanticsOptions } from '@inflect/plugin-set-semantics';
+import { setSemantics } from '@inflect/plugin-set-semantics';
 
-const setRole: Action<Document, Element, SetSemanticsOptions> = (
+export type SetRoleOptions = { values: string[] };
+export const setRole: Action<Document, Element, SetRoleOptions> = (
 	dom,
 	el,
 	parameter,
@@ -13,5 +14,3 @@ const setRole: Action<Document, Element, SetSemanticsOptions> = (
 		});
 	}
 };
-
-export default setRole;

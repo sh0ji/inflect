@@ -1,7 +1,7 @@
 import { AsyncAction } from '@inflect/core';
-import setSemantics, { SetSemanticsOptions } from '@inflect/plugin-set-semantics';
+import { setSemantics, SetSemanticsOptions } from '@inflect/plugin-set-semantics';
 
-const setSemanticsAsync: AsyncAction<Document, Element, SetSemanticsOptions> = (
+export const setSemanticsAsync: AsyncAction<Document, Element, SetSemanticsOptions> = (
 	dom,
 	el,
 	parameter,
@@ -14,5 +14,4 @@ const setSemanticsAsync: AsyncAction<Document, Element, SetSemanticsOptions> = (
 	}
 });
 
-export default setSemanticsAsync;
 export { SetSemanticsOptions } from '@inflect/plugin-set-semantics';

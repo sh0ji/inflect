@@ -1,4 +1,4 @@
-import HtmlNode from './HtmlNode';
+import { HtmlNode } from './HtmlNode';
 
 export type Action<D = Document, T = Element, O = Record<string, unknown>> =
 	(dom: D, node: T, opts?: O) => void | T;
@@ -12,7 +12,7 @@ export interface TaskInterface {
 	parameter?: Record<string, unknown>;
 }
 
-class Task {
+export class Task {
 	#taskObj: TaskInterface;
 
 	public elements: HtmlNode[];
@@ -56,5 +56,3 @@ class Task {
 		this.isDone = true;
 	}
 }
-
-export default Task;

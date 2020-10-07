@@ -1,7 +1,7 @@
 import { AsyncAction } from '@inflect/core';
-import changeTag, { ChangeTagOptions } from '@inflect/plugin-change-tag';
+import { changeTag, ChangeTagOptions } from '@inflect/plugin-change-tag';
 
-const changeTagAsync: AsyncAction<Document, Element, ChangeTagOptions> = (
+export const changeTagAsync: AsyncAction<Document, Element, ChangeTagOptions> = (
 	dom,
 	el,
 	parameter,
@@ -14,4 +14,4 @@ const changeTagAsync: AsyncAction<Document, Element, ChangeTagOptions> = (
 	}
 });
 
-export default changeTagAsync;
+export { ChangeTagOptions } from '@inflect/plugin-change-tag';

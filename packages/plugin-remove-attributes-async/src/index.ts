@@ -1,7 +1,7 @@
 import { AsyncAction } from '@inflect/core';
-import removeAttributes, { RemoveAttributesOptions } from '@inflect/plugin-remove-attributes';
+import { removeAttributes, RemoveAttributesOptions } from '@inflect/plugin-remove-attributes';
 
-const removeAttributesAsync: AsyncAction<Document, Element, RemoveAttributesOptions> = (
+export const removeAttributesAsync: AsyncAction<Document, Element, RemoveAttributesOptions> = (
 	dom,
 	el,
 	parameter,
@@ -14,4 +14,4 @@ const removeAttributesAsync: AsyncAction<Document, Element, RemoveAttributesOpti
 	}
 });
 
-export default removeAttributesAsync;
+export { RemoveAttributesOptions } from '@inflect/plugin-remove-attributes';

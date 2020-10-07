@@ -1,7 +1,7 @@
 import { AsyncAction } from '@inflect/core';
-import removeElement, { RemoveElementOptions } from '@inflect/plugin-remove-element';
+import { removeElement, RemoveElementOptions } from '@inflect/plugin-remove-element';
 
-const removeElementAsync: AsyncAction<Document, Element, RemoveElementOptions> = (
+export const removeElementAsync: AsyncAction<Document, Element, RemoveElementOptions> = (
 	dom,
 	el,
 	parameter,
@@ -14,4 +14,4 @@ const removeElementAsync: AsyncAction<Document, Element, RemoveElementOptions> =
 	}
 });
 
-export default removeElementAsync;
+export { RemoveElementOptions } from '@inflect/plugin-remove-element';

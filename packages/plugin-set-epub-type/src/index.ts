@@ -1,7 +1,7 @@
 import { Action } from '@inflect/core';
-import setSemantics, { SetSemanticsOptions } from '@inflect/plugin-set-semantics';
+import { setSemantics, SetSemanticsOptions } from '@inflect/plugin-set-semantics';
 
-const setEpubType: Action<Document, Element, SetSemanticsOptions> = (
+export const setEpubType: Action<Document, Element, SetSemanticsOptions> = (
 	dom,
 	el,
 	parameter,
@@ -13,5 +13,3 @@ const setEpubType: Action<Document, Element, SetSemanticsOptions> = (
 		});
 	}
 };
-
-export default setEpubType;

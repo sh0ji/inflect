@@ -3,7 +3,7 @@ export interface NodeLocation {
 	endOffset: number;
 }
 
-class HtmlNode {
+export class HtmlNode {
 	public done = false;
 
 	constructor(public element: Element | null) {
@@ -15,5 +15,3 @@ class HtmlNode {
 		this.done = true;
 	}
 }
-
-export default HtmlNode;

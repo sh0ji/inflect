@@ -1,8 +1,8 @@
 import { EventEmitter } from 'events';
-import HTMLNode from './HtmlNode';
-import Task, { TaskInterface } from './Task';
+import { HtmlNode } from './HtmlNode';
+import { Task, TaskInterface } from './Task';
 
-export default class Inflect extends EventEmitter {
+export class Inflect extends EventEmitter {
 	public data: Record<string, (Element|undefined)[]> = {};
 
 	#tasks: Task[] = [];
@@ -18,7 +18,7 @@ export default class Inflect extends EventEmitter {
 	}
 
 	init(): this {
-		this.on('actionEnd', (res, task: Task, el: HTMLNode) => {
+		this.on('actionEnd', (res, task: Task, el: HtmlNode) => {
 			this.processResults(res, task, el);
 			el.markDone();
 			this.iterateCount(task.name);
@@ -87,7 +87,7 @@ export default class Inflect extends EventEmitter {
 		return this;
 	}
 
-	processResults(results: Element | undefined, task: Task, el: HTMLNode): void {
+	processResults(results: Element | undefined, task: Task, el: HtmlNode): void {
 		if (Array.isArray(results)) {
 			results.forEach((result) => this.processResults(result, task, el));
 		} else if (results instanceof Error) {

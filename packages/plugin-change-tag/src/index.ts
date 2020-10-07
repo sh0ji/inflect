@@ -1,7 +1,11 @@
 import { Action } from '@inflect/core';
 
 export type ChangeTagOptions = { tag: HTMLElementTagNameMap };
-const changeTag: Action<Document, Element, ChangeTagOptions> = (dom, el, parameter): void => {
+export const changeTag: Action<Document, Element, ChangeTagOptions> = (
+	dom,
+	el,
+	parameter,
+): void => {
 	if (parameter) {
 		const { tag } = parameter;
 		const currentTag = el.tagName.toLowerCase();
@@ -18,5 +22,3 @@ const changeTag: Action<Document, Element, ChangeTagOptions> = (dom, el, paramet
 		}
 	}
 };
-
-export default changeTag;
