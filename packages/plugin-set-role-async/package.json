@@ -30,6 +30,7 @@
 	},
 	"dependencies": {
 		"@inflect/core": "^2.1.0",
+		"@inflect/plugin-set-role": "^1.0.0",
 		"@inflect/plugin-set-semantics-async": "^1.0.0"
 	}
 }
