@@ -26,6 +26,8 @@ module.exports = {
 				'no-tabs': 'off',
 				'@typescript-eslint/indent': ['error', 'tab'],
 				'import/no-cycle': [2, { maxDepth: 1 }],
+				'import/prefer-default-export': 'off',
+				'import/no-default-export': 'error',
 			},
 			parserOptions: {
 				project: './tsconfig.json',
