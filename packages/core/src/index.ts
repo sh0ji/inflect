@@ -108,4 +108,5 @@ export class Inflect extends EventEmitter {
 	}
 }
 
+export { TaskInterface };
 export { Action, AsyncAction } from './Task';
