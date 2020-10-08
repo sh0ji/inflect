@@ -2,8 +2,7 @@ import { Action } from '@inflect/core';
 import flattenDeep from 'lodash.flattendeep';
 
 export type RemoveAttributesOptions = { attributes: string[] } | undefined;
-export const removeAttributes: Action<Document, Element, RemoveAttributesOptions> = (
-	_dom,
+export const removeAttributes: Action<Element, RemoveAttributesOptions> = (
 	el,
 	parameter,
 ): void => {

@@ -1,13 +1,12 @@
 import { AsyncAction } from '@inflect/core';
 import { removeElement, RemoveElementOptions } from '@inflect/plugin-remove-element';
 
-export const removeElementAsync: AsyncAction<Document, Element, RemoveElementOptions> = (
-	dom,
+export const removeElementAsync: AsyncAction<Element, RemoveElementOptions> = (
 	el,
 	parameter,
 ): Promise<void> => new Promise((resolve, reject) => {
 	try {
-		removeElement(dom, el, parameter);
+		removeElement(el, parameter);
 		resolve();
 	} catch (err) {
 		reject(err);

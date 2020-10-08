@@ -1,7 +1,6 @@
 import { AsyncAction } from '@inflect/core';
 import { removeElementAsync } from '@inflect/plugin-remove-element-async';
 
-export const removeParentAsync: AsyncAction<Document, Element> = (
-	dom,
+export const removeParentAsync: AsyncAction<Element> = (
 	el,
-) => removeElementAsync(dom, el.parentNode as Element);
+) => removeElementAsync(el.parentNode as Element);

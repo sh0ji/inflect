@@ -1,13 +1,12 @@
 import { AsyncAction } from '@inflect/core';
 import { setSemantics, SetSemanticsOptions } from '@inflect/plugin-set-semantics';
 
-export const setSemanticsAsync: AsyncAction<Document, Element, SetSemanticsOptions> = (
-	dom,
+export const setSemanticsAsync: AsyncAction<Element, SetSemanticsOptions> = (
 	el,
 	parameter,
 ): Promise<void> => new Promise((resolve, reject) => {
 	try {
-		setSemantics(dom, el, parameter);
+		setSemantics(el, parameter);
 		resolve();
 	} catch (err) {
 		reject(err);
