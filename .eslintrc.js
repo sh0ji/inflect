@@ -28,6 +28,7 @@ module.exports = {
 				'import/no-cycle': [2, { maxDepth: 1 }],
 				'import/prefer-default-export': 'off',
 				'import/no-default-export': 'error',
+				'no-param-reassign': 'off',
 			},
 			parserOptions: {
 				project: './tsconfig.json',
