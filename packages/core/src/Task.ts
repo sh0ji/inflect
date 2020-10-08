@@ -29,7 +29,7 @@ export class Task {
 		return this.#taskObj.selector;
 	}
 
-	get action(): Action {
+	get action(): Action | AsyncAction {
 		return this.#taskObj.action;
 	}
 
