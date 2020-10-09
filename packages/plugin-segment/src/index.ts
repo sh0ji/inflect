@@ -1,3 +1,5 @@
+/* eslint-disable class-methods-use-this */
+/* eslint-disable no-console */
 /**
  * --------------------------------------------------------------------------
  * Segment (v1.1.0): segment.js
@@ -7,12 +9,35 @@
  * --------------------------------------------------------------------------
  */
 
-const NAME = 'segment';
-const VERSION = '1.1.0';
+type Config = {
+	debug: boolean,
+	headingAnchor: boolean,
+	autoWrap: boolean,
+	startLevel: number,
+	excludeClass: string,
+	sectionClass: string,
+	anchorClass: string,
+};
+
+type Callback = (error: Err, result?: Element | boolean) => void;
+
+type Err = {
+	title: string,
+	description: string,
+	element?: Element,
+} | null;
+
+type Item = {
+	contents: string | null,
+	excluded: boolean,
+	id: string,
+	level: number | null,
+}
+
 const HEADINGS = ['H1', 'H2', 'H3', 'H4', 'H5', 'H6'];
 const DATA_LEVEL = 'data-level';
 
-const Default = {
+const Default: Config = {
 	debug: false,
 	headingAnchor: true,
 	autoWrap: true,
@@ -24,15 +49,15 @@ const Default = {
 
 // errors borrowed from Khan Academy's tota11y library
 // https://github.com/Khan/tota11y
-const Error = {
-	FIRST_NOT_H1(el, currentLvl) {
+const Errors = {
+	FIRST_NOT_H1(el: Element, currentLvl: number): Err {
 		return {
 			title: 'First heading is not an <h1>.',
 			description: `To give your document a proper structure for assistive technologies, it is important to lay out your headings beginning with an <h1>. The first heading was an <h${currentLvl}>.`,
 			element: el,
 		};
 	},
-	NONCONSECUTIVE_HEADER(el, currentLvl, prevLvl) {
+	NONCONSECUTIVE_HEADER(el: Element, currentLvl: number, prevLvl: number): Err {
 		let description = `This document contains an <h${currentLvl}> tag directly following an <h${prevLvl}>. In order to maintain a consistent outline of the page for assistive technologies, reduce the gap in the heading level by upgrading this tag to an <h${prevLvl + 1}>`;
 
 		// Suggest upgrading the tag to the same level as `prevLvl` iff
@@ -51,20 +76,20 @@ const Error = {
 	},
 
 	// additional errors not in tota11y
-	NO_HEADINGS_FOUND() {
+	NO_HEADINGS_FOUND(): Err {
 		return {
 			title: 'No headings found.',
 			description: 'Please ensure that all headings are properly tagged.',
 		};
 	},
-	PRE_EXISTING_SECTION(el, currentLvl) {
+	PRE_EXISTING_SECTION(el: Element, currentLvl: number): Err {
 		return {
 			title: 'Pre-existing <section> tag',
 			description: `The current <h${currentLvl}> is already the direct child of a <section> tag.`,
 			element: el,
 		};
 	},
-	INVALID_DOCUMENT(debug) {
+	INVALID_DOCUMENT(debug: boolean): Err {
 		let description = 'One or more headings did not pass validation.';
 
 		// suggest turning on debugging
@@ -79,8 +104,16 @@ const Error = {
 	},
 };
 
-class Segment {
-	constructor(doc, config) {
+export class Segment {
+	public headings: Element[];
+
+	public validHeadings: boolean;
+
+	public docIDs: (string | null)[];
+
+	public sections: Element[] = [];
+
+	constructor(private doc: Document, private config: Config) {
 		// doc must be a DOCUMENT_NODE (nodeType 9)
 		if (doc.nodeType !== 9) {
 			console.error('Valid document required.');
@@ -89,35 +122,36 @@ class Segment {
 		}
 
 		// build the configuration from defaults
-		this.config = this._getConfig(config);
+		this.config = this.getConfig(config);
 
 		// collect all the headings in the document
 		this.headings = Array.from(this.doc.querySelectorAll(HEADINGS.join(',')));
 		// post an error if none are found
 		if (this.config.debug && this.headings.length === 0) {
-			this._postError(Error.NO_HEADINGS_FOUND());
+			this.postError(Errors.NO_HEADINGS_FOUND());
 		}
 
 		// validate the document
 		this.validHeadings = this.validateDocument();
 		// post an error if the document isn't valid
 		if (!this.validHeadings) {
-			this._postError(Error.INVALID_DOCUMENT(this.config.debug));
+			this.postError(Errors.INVALID_DOCUMENT(this.config.debug));
 		}
 
 		// collect all the ids in the document
-		this.docIDs = this._getDocIDs();
+		this.docIDs = this.getDocIDs();
 
 		// automatically create section containers
 		if (this.config.autoWrap && this.validHeadings) {
-			this.sections = [];
-			this.headings.map((heading) => this.createSection(heading, (err, section) => {
-				if (err) {
-					this._postError(err);
-				} else {
-					this.sections.push(section);
-				}
-			}));
+			this.headings.forEach((heading) => {
+				this.createSection(heading, (err, section) => {
+					if (err) {
+						this.postError(err);
+					} else if (section instanceof Element) {
+						this.sections.push(section);
+					}
+				});
+			});
 		}
 	}
 
@@ -125,20 +159,20 @@ class Segment {
 
 	// asynchronously validate a heading element
 	// callback returns (error object, boolean valid)
-	validateHeading(currentHead, prevHead, callback) {
-		const currentLvl = this._getHeadingLevel(currentHead);
-		const prevLvl = this._getHeadingLevel(prevHead);
+	validateHeading(currentHead: Element, prevHead: Element, callback: Callback): void {
+		const currentLvl = this.getHeadingLevel(currentHead);
+		const prevLvl = this.getHeadingLevel(prevHead);
 
 		// first heading not h1
-		if (!prevLvl && currentLvl !== 1) {
+		if (!prevLvl && currentLvl && currentLvl !== 1) {
 			if (this.config.debug) {
-				callback(Error.FIRST_NOT_H1(currentHead, currentLvl));
+				callback(Errors.FIRST_NOT_H1(currentHead, currentLvl));
 			}
 
 			// non-consecutive headings
-		} else if (prevLvl && (currentLvl - prevLvl > 1)) {
+		} else if (prevLvl && currentLvl && (currentLvl - prevLvl > 1)) {
 			if (this.config.debug) {
-				callback(Error.NONCONSECUTIVE_HEADER(currentHead, currentLvl, prevLvl));
+				callback(Errors.NONCONSECUTIVE_HEADER(currentHead, currentLvl, prevLvl));
 			}
 		}
 
@@ -147,13 +181,13 @@ class Segment {
 	}
 
 	// synchronously validate the whole document
-	validateDocument() {
-		let prevHead = null;
-		const valid = [];
-		this.headings.map((heading) => {
+	validateDocument(): boolean {
+		let prevHead: Element;
+		const valid: (Element|boolean|undefined)[] = [];
+		this.headings.forEach((heading) => {
 			this.validateHeading(heading, prevHead, (err, result) => {
 				if (err) {
-					this._postError(err);
+					this.postError(err);
 				}
 				valid.push(result);
 			});
@@ -164,34 +198,37 @@ class Segment {
 
 	// asynchronously create section containers
 	// callback returns (error object, section element)
-	createSection(heading, callback) {
-		const item = this._buildItem(heading);
-		if (item.level < this.config.startLevel) return;
+	createSection(heading: Element, callback: Callback): void {
+		const item: Item = this.buildItem(heading);
+		if (item.level && item.level < this.config.startLevel) return;
 
-		const parent = heading.parentNode;
+		const parent = heading.parentNode as Element;
 
 		// check for a pre-existing section container
-		if (parent.nodeName === 'SECTION'
-            && !parent.classList.contains(this.config.sectionClass)) {
-			callback(Error.PRE_EXISTING_SECTION(heading, item.level));
+		if (item.level
+				&& parent?.nodeName === 'SECTION'
+        && !parent?.classList.contains(this.config.sectionClass)) {
+			callback(Errors.PRE_EXISTING_SECTION(heading, item.level));
 		}
 
 		// create the section container
 		const section = this.doc.createElement('section');
 		section.setAttribute('id', item.id);
-		section.setAttribute(DATA_LEVEL, item.level);
+		if (item.level) {
+			section.setAttribute(DATA_LEVEL, `${item.level}`);
+		}
 		section.className = this.config.sectionClass;
 
 		// attach the section to the correct place in the DOM
-		if (parent.getAttribute(DATA_LEVEL) == item.level) {
-			parent.parentNode.insertBefore(section, parent.nextElementSibling);
+		if (parent.getAttribute(DATA_LEVEL) === item.level) {
+			parent?.parentNode?.insertBefore(section, parent.nextElementSibling);
 		} else {
 			parent.insertBefore(section, heading);
 		}
 
 		// populate the section element
-		const matched = this._nextUntilSameTag(heading, item);
-		matched.map((elem) => {
+		const matched = this.nextUntilSameTag(heading);
+		matched.forEach((elem) => {
 			section.appendChild(elem);
 		});
 
@@ -200,7 +237,7 @@ class Segment {
 		if (this.config.headingAnchor) {
 			const anchor = this.doc.createElement('a');
 			anchor.setAttribute('href', `#${item.id}`);
-			anchor.setAttribute('tabindex', -1);
+			anchor.setAttribute('tabindex', '-1');
 			anchor.textContent = item.contents;
 			heading.innerHTML = anchor.outerHTML;
 			heading.className = this.config.anchorClass;
@@ -210,21 +247,21 @@ class Segment {
 
 	// private
 
-	_getConfig(config) {
+	private getConfig(config: Config): Config {
 		return { ...Default, ...config };
 	}
 
-	_getDocIDs() {
+	private getDocIDs() {
 		const idElements = Array.from(this.doc.querySelectorAll('[id]'));
 		return idElements.map((el) => el.getAttribute('id'));
 	}
 
-	_getHeadingLevel(el) {
+	private getHeadingLevel(el: Element): number | null {
 		const isHeading = (el) ? HEADINGS.includes(el.nodeName) : false;
-		return (isHeading) ? parseInt(el.nodeName.substr(1)) : null;
+		return (isHeading) ? parseInt(el.nodeName.substr(1), 10) : null;
 	}
 
-	_constructID(string) {
+	private constructID(string: string) {
 		let id = string.trim()
 		// start with letter. remove apostrophes & quotes
 			.replace(/^[^A-Za-z]*/, '').replace(/[‘’'“”"]/g, '')
@@ -239,51 +276,52 @@ class Segment {
 			const root = id;
 			let n = 0;
 			do {
-				n++;
+				n += 1;
 				id = `${root}-${n}`;
 			} while (this.docIDs.includes(id));
 		}
 		return id;
 	}
 
-	_buildItem(el) {
+	private buildItem(el: Element): Item {
 		return {
 			contents: el.textContent,
 			excluded: el.classList.contains(this.config.excludeClass),
-			id: this._constructID(el.textContent),
-			level: this._getHeadingLevel(el),
+			id: this.constructID(el.textContent || ''),
+			level: this.getHeadingLevel(el),
 		};
 	}
 
 	// collect all the elements from el to the next same tagName
 	// borrowed from jQuery.nextUntil()
-	_nextUntilSameTag(el) {
+	private nextUntilSameTag(el: Element) {
 		const original = {
 			nodeName: el.nodeName,
-			level: this._getHeadingLevel(el),
+			level: this.getHeadingLevel(el),
 		};
 		const matched = [];
 		matched.push(el);
-		while ((el = el.nextSibling) && el.nodeType !== 9) {
+		let next = el;
+		while (next && el.nodeType !== 9) {
 			if (el.nodeType === 1) {
-				const level = this._getHeadingLevel(el);
+				const level = this.getHeadingLevel(el);
 				// stop on same tag or lower heading level
-				if (el.nodeName === original.nodeName || (level && level < original.level)) break;
+				if (el.nodeName === original.nodeName
+					|| (level && original.level && level < original.level)) break;
 				matched.push(el);
 			}
+			next = next.nextSibling as Element;
 		}
 		return matched;
 	}
 
 	// ^ REFACTORED ^
 
-	_postError(error) {
-		console.warn(error.title);
-		console.warn(error.description);
-		if (error.element) {
+	private postError(error: Err) {
+		console.warn(error?.title);
+		console.warn(error?.description);
+		if (error?.element) {
 			console.warn(error.element);
 		}
 	}
 }
-
-export default Segment;
