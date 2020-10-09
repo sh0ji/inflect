@@ -1,6 +1,6 @@
 import { Action } from '@inflect/core';
 
-export type ChangeTagOptions = { tag: HTMLElementTagNameMap };
+export type ChangeTagOptions = { tag: string };
 export const changeTag: Action<Element, ChangeTagOptions, Document> = (
 	el,
 	parameter,
