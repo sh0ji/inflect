@@ -3,6 +3,11 @@
 	"version": "1.1.0",
 	"description": "Wrap headings and their contents in semantic section containers",
 	"homepage": "https://github.com/wwnorton/inflect#readme",
+	"keywords": [
+		"Inflect",
+		"plugin",
+		"HTML"
+	],
 	"bugs": {
 		"url": "https://github.com/wwnorton/inflect/issues"
 	},
@@ -17,7 +22,10 @@
 	"umd:main": "dist/index.umd.js",
 	"module": "dist/index.m.js",
 	"source": "src/index.ts",
-	"types": "dist/dist.d.ts",
+	"types": "dist/index.d.ts",
+	"files": [
+		"dist"
+	],
 	"scripts": {
 		"build": "microbundle --format cjs"
 	}
