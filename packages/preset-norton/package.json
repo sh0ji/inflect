@@ -1,0 +1,41 @@
+{
+  "name": "@inflect/preset-norton",
+  "version": "1.0.0",
+  "description": "Common Norton tasks for @inflect/core.",
+  "keywords": [
+    "Inflect",
+    "plugin",
+    "HTML"
+  ],
+  "author": "Gabriel Rumbaut",
+  "homepage": "https://github.com/wwnorton/inflect#readme",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.m.js",
+  "source": "src/index.ts",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/wwnorton/inflect.git",
+    "directory": "packages/preset-norton"
+  },
+  "scripts": {
+    "build": "microbundle --format cjs"
+  },
+  "bugs": {
+    "url": "https://github.com/wwnorton/inflect/issues"
+  },
+  "dependencies": {
+    "@inflect/core": "^2.1.0",
+    "@inflect/plugin-change-tag": "^1.0.0",
+    "@inflect/plugin-remove-attributes": "^1.0.0",
+    "@inflect/plugin-remove-container": "^1.0.0",
+    "@inflect/plugin-replace-entities": "^1.0.0",
+    "@inflect/plugin-segment": "^1.1.0",
+    "fuse.js": "^6.4.1",
+    "web-id": "^2.1.0"
+  }
+}
