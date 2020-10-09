@@ -9,15 +9,15 @@
  * --------------------------------------------------------------------------
  */
 
-type Config = {
-	debug: boolean,
-	headingAnchor: boolean,
-	autoWrap: boolean,
-	startLevel: number,
-	excludeClass: string,
-	sectionClass: string,
-	anchorClass: string,
-};
+interface Config {
+	debug?: boolean;
+	headingAnchor?: boolean;
+	autoWrap?: boolean;
+	startLevel?: number;
+	excludeClass?: string;
+	sectionClass?: string;
+	anchorClass?: string;
+}
 
 type Callback = (error: Err, result?: Element | boolean) => void;
 
@@ -89,7 +89,7 @@ const Errors = {
 			element: el,
 		};
 	},
-	INVALID_DOCUMENT(debug: boolean): Err {
+	INVALID_DOCUMENT(debug = false): Err {
 		let description = 'One or more headings did not pass validation.';
 
 		// suggest turning on debugging
@@ -200,14 +200,16 @@ export class Segment {
 	// callback returns (error object, section element)
 	createSection(heading: Element, callback: Callback): void {
 		const item: Item = this.buildItem(heading);
-		if (item.level && item.level < this.config.startLevel) return;
+		const { startLevel, sectionClass, anchorClass } = this.config;
+		if (item.level && startLevel && item.level < startLevel) return;
 
 		const parent = heading.parentNode as Element;
 
 		// check for a pre-existing section container
 		if (item.level
 				&& parent?.nodeName === 'SECTION'
-        && !parent?.classList.contains(this.config.sectionClass)) {
+				&& sectionClass
+        && !parent?.classList.contains(sectionClass)) {
 			callback(Errors.PRE_EXISTING_SECTION(heading, item.level));
 		}
 
@@ -217,7 +219,9 @@ export class Segment {
 		if (item.level) {
 			section.setAttribute(DATA_LEVEL, `${item.level}`);
 		}
-		section.className = this.config.sectionClass;
+		if (sectionClass) {
+			section.className = sectionClass;
+		}
 
 		// attach the section to the correct place in the DOM
 		if (parent.getAttribute(DATA_LEVEL) === item.level) {
@@ -240,7 +244,9 @@ export class Segment {
 			anchor.setAttribute('tabindex', '-1');
 			anchor.textContent = item.contents;
 			heading.innerHTML = anchor.outerHTML;
-			heading.className = this.config.anchorClass;
+			if (anchorClass) {
+				heading.className = anchorClass;
+			}
 		}
 		callback(null, section);
 	}
@@ -284,12 +290,17 @@ export class Segment {
 	}
 
 	private buildItem(el: Element): Item {
-		return {
+		const item = {
 			contents: el.textContent,
-			excluded: el.classList.contains(this.config.excludeClass),
 			id: this.constructID(el.textContent || ''),
+			excluded: false,
 			level: this.getHeadingLevel(el),
 		};
+		const { excludeClass } = this.config;
+		if (excludeClass && el.classList.contains(excludeClass)) {
+			item.excluded = true;
+		}
+		return item;
 	}
 
 	// collect all the elements from el to the next same tagName
