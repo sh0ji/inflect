@@ -1,10 +1,10 @@
 import { Action } from '@inflect/core';
 
 export type ChangeTagOptions = { tag: string };
-export const changeTag: Action<Element, ChangeTagOptions, Document> = (
+export const changeTag: Action<Document, Element, ChangeTagOptions> = (
+	dom,
 	el,
 	parameter,
-	dom,
 ): void => {
 	if (parameter) {
 		const { tag } = parameter;

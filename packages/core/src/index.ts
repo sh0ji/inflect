@@ -60,7 +60,7 @@ export class Inflect extends EventEmitter {
 			if (!el.element) {
 				this.emit('actionEnd', null, task, el);
 			} else {
-				const results = task.action(el.element, task.parameter, this.dom);
+				const results = task.action(this.dom, el.element, task.parameter);
 				if (results && 'then' in results) {
 					(results as Promise<unknown>)
 						.then((res) => this.emit('actionEnd', res, task, el))

@@ -1,7 +1,8 @@
 import { Action } from '@inflect/core';
 
 export type RemoveElementOptions = { keepChildren: boolean };
-export const removeElement: Action<Element, RemoveElementOptions> = (
+export const removeElement: Action<Document, Element, RemoveElementOptions> = (
+	_dom,
 	el,
 	parameter,
 ): void => {

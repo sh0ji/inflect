@@ -2,7 +2,8 @@ import { Action } from '@inflect/core';
 import flattenDeep from 'lodash.flattendeep';
 
 export type SetSemanticsOptions = { attribute: string, values: string[] };
-export const setSemantics: Action<Element, SetSemanticsOptions> = (
+export const setSemantics: Action<Document, Element, SetSemanticsOptions> = (
+	_dom,
 	el,
 	parameter,
 ): void => {
